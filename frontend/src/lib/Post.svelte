@@ -1,4 +1,7 @@
 <script>
+	// Svelte
+	import { createEventDispatcher } from 'svelte'
+	const dispatch = createEventDispatcher()
 	// Icons
 	import FaRegArrowAltCircleDown from 'svelte-icons/fa/FaRegArrowAltCircleDown.svelte'
 	import FaArrowUp from 'svelte-icons/fa/FaArrowUp.svelte'
@@ -29,6 +32,7 @@
 			error = true
 		}
 	}
+	$: console.log(post)
 </script>
 
 <div
@@ -39,12 +43,23 @@
 	<article class="prose">
 		<h2 class="font-bold text-4xl text-center">{post.title}</h2>
 		<p class="text-center">
-			Posted by <span class="font-bold text-violet-800"
+			Posted by <span
+				on:click={() => dispatch('user', post.created_by.id)}
+				class="cursor-pointer font-bold text-violet-800"
 				>{post.created_by.first_name}
 				{post.created_by.last_name}</span
 			>
 			on {formatTime(post.created_at)}
+			{#if post.group}
+				in <span
+					on:click={() => dispatch('group', post.group.id)}
+					class="cursor-pointer text-orange-600 font-extrabold"
+				>
+					{post.group.title}
+				</span>
+			{/if}
 		</p>
+
 		<div class="container flex flex-col">
 			<p>{@html contentWithBlockquotes}</p>
 			{#if post.image_url != '' && post.image_url}

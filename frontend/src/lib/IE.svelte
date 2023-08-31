@@ -9,6 +9,7 @@
 	// Components
 	import Profile from './Profile.svelte'
 	import Post from './Post.svelte'
+	import ViewProfile from './ViewProfile.svelte'
 
 	// Icons
 	import FaRegWindowClose from 'svelte-icons/fa/FaRegWindowClose.svelte'
@@ -18,6 +19,9 @@
 	// Stores
 	import { postsStore, groupPostsStore } from '../stores/post'
 	import { currentUser } from '../stores/user'
+
+	// utils
+	import { getProfile } from '../utils'
 
 	export let ieUrl
 	export let z
@@ -49,6 +53,25 @@
 	function destroySelf() {
 		dispatch('close')
 		THISComponent.$destroy()
+	}
+
+	let profile
+	let id
+	async function onClick(event) {
+		id = event.detail
+		switch (event.type) {
+			case 'user':
+				if (id == $currentUser.id) {
+					route = 'profile'
+					return
+				}
+				profile = await getProfile(id)
+				route = 'user/' + id
+				break
+			case 'group':
+				console.log(id)
+				break
+		}
 	}
 
 	$: posts = $postsStore
@@ -104,14 +127,16 @@
 		</nav>
 		{#if route == 'posts'}
 			{#each posts as post, index (post.post_id)}
-				<Post {post} />
+				<Post {post} on:user={onClick} />
 			{/each}
 		{:else if route == 'group_posts'}
 			{#each group_posts as gPost, index (gPost.post_id)}
-				<Post post={gPost} />
+				<Post post={gPost} on:group={onClick} on:user={onClick} />
 			{/each}
 		{:else if route == 'profile'}
-			<Profile />
+			<Profile on:user={onClick} />
+		{:else if route == 'user/' + id}
+			<ViewProfile {profile} on:user={onClick} />
 		{/if}
 	</div>
 </div>

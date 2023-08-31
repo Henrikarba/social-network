@@ -1,5 +1,9 @@
 <script>
+	// Svelte
+	import { createEventDispatcher } from 'svelte'
+	const dispatch = createEventDispatcher()
 	//
+	import { formatDateTime } from '../utils.js'
 	import { socket } from '../ws'
 
 	// Icons
@@ -14,8 +18,7 @@
 	let following = $currentUserFollowing
 
 	// Birthday
-	let date = new Date(user.date_of_birth)
-	let birthday = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+	let birthday = formatDateTime(user.date_of_birth)
 
 	const hackerman = new URL('../assets/robot.jpg', import.meta.url).href
 
@@ -64,7 +67,10 @@
 			{#if followers}
 				<h2 class="border-b-2 font-bold">My followers</h2>
 				{#each followers as follower, index (follower.id)}
-					<h2>{follower.first_name} {follower.last_name}</h2>
+					<h2 on:click={() => dispatch('user', follower.id)} class="text-orange-800 cursor-pointer font-extrabold">
+						{follower.first_name}
+						{follower.last_name}
+					</h2>
 				{/each}
 			{:else}
 				<h2 class="border-b-2 font-bold">No followers!!1</h2>
@@ -74,7 +80,10 @@
 			{#if following}
 				<h2 class="border-b-2 font-bold">peepz who follow me</h2>
 				{#each following as follower, index (follower.id)}
-					<h2>{follower.first_name} {follower.last_name}</h2>
+					<h2 on:click={() => dispatch('user', follower.id)} class="text-orange-800 cursor-pointer font-extrabold">
+						{follower.first_name}
+						{follower.last_name}
+					</h2>
 				{/each}
 			{:else}
 				<h2 class="border-b-2 font-bold">no one follows me</h2>
