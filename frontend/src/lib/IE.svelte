@@ -3,18 +3,29 @@
 	import { get_current_component } from 'svelte/internal'
 	const THISComponent = get_current_component()
 	import { createEventDispatcher } from 'svelte'
+	const dispatch = createEventDispatcher()
 	import { scale } from 'svelte/transition'
+
+	// Components
+	import Post from './Post.svelte'
+
 	// Icons
 	import FaRegWindowClose from 'svelte-icons/fa/FaRegWindowClose.svelte'
 	import MdFullscreen from 'svelte-icons/md/MdFullscreen.svelte'
 	import MdFullscreenExit from 'svelte-icons/md/MdFullscreenExit.svelte'
 
+	// Stores
+	import { postsStore, groupPostsStore } from '../stores/post'
+
 	export let ieUrl
 	export let z
+
 	let left = 400
 	let top = 100
 	let full = false
 	let moving = false
+
+	let route = 'posts'
 
 	function onMouseDown() {
 		dispatch('last', 'ie')
@@ -38,7 +49,8 @@
 		THISComponent.$destroy()
 	}
 
-	const dispatch = createEventDispatcher()
+	$: posts = $postsStore
+	$: group_posts = $groupPostsStore
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -78,13 +90,24 @@
 	</div>
 	<div class="h-10 bg-gradient-to-r from-zinc-400 to-zinc-600 border-b-2 border-black flex items-center">
 		<div class="w-[90%] mx-auto bg-slate-200 rounded select-none">
-			<p class="ml-4">http://localhost:5000/posts</p>
+			<p class="ml-4">http://localhost:5000/{route}</p>
 		</div>
 	</div>
-	<div class="{'full ? h-full : h-[635px]'} overflow-y-auto bg-slate-100">
-		<h2>hello</h2>
-		<h2>hello</h2>
-		<h2>hello</h2>
+	<div class="{'full ? h-[88%] : h-[635px]'} overflow-y-scroll bg-slate-100 p-6">
+		<nav class="flex items-center justify-center gap-4 font-bold text-4xl border-b-4 border-slate-900">
+			<button on:click={() => (route = 'posts')}>[POSTS]</button>
+			<button on:click={() => (route = 'group_posts')}>[GROUP POSTS]</button>
+			<button on:click={() => (route = 'groups')}>[GROUPS]</button>
+		</nav>
+		{#if route == 'posts'}
+			{#each posts as post, index (post.post_id)}
+				<Post {post} />
+			{/each}
+		{:else if route == 'group_posts'}
+			{#each group_posts as gPost, index (gPost.post_id)}
+				<Post post={gPost} />
+			{/each}
+		{/if}
 	</div>
 </div>
 <svelte:window on:mouseup={onMouseUp} on:mousemove={onMouseMove} />

@@ -1,4 +1,8 @@
 <script>
+	// WS
+	import { socket } from './ws'
+
+	// Components
 	import Footer from './lib/Footer.svelte'
 	import Shortcut from './lib/Shortcut.svelte'
 	import IE from './lib/IE.svelte'
@@ -18,6 +22,7 @@
 	}
 	let last
 	let zMax
+
 	$: last = zMax
 	function zindex(event) {
 		zMax = event.detail
