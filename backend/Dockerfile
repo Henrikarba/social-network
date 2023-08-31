@@ -21,8 +21,8 @@ FROM scratch
 COPY --from=build /build/app /app
 COPY --from=build /build/.env /.env
 COPY --from=build /build/pkg/db/migrations /pkg/db/migrations
-COPY --from=build /build/files/images/post /files/images/post
-COPY --from=build /build/files/images/profile /files/images/profile
+COPY --from=build /build/pkg/db/files/images/post pkg/db/files/images/post
+COPY --from=build /build/pkg/db/files/images/profile pkg/db/files/images/profile
 
 # Set the entry point for the container
 EXPOSE 80
