@@ -7,6 +7,7 @@
 	import { scale } from 'svelte/transition'
 
 	// Components
+	import Profile from './Profile.svelte'
 	import Post from './Post.svelte'
 
 	// Icons
@@ -16,6 +17,7 @@
 
 	// Stores
 	import { postsStore, groupPostsStore } from '../stores/post'
+	import { currentUser } from '../stores/user'
 
 	export let ieUrl
 	export let z
@@ -93,11 +95,12 @@
 			<p class="ml-4">http://localhost:5000/{route}</p>
 		</div>
 	</div>
-	<div class="{'full ? h-[88%] : h-[635px]'} overflow-y-scroll bg-slate-100 p-6">
+	<div class="{'full ? h-[88%] : h-[635px]'} overflow-y-scroll overflow-x-hidden bg-slate-100 p-6">
 		<nav class="flex items-center justify-center gap-4 font-bold text-4xl border-b-4 border-slate-900">
 			<button on:click={() => (route = 'posts')}>[POSTS]</button>
 			<button on:click={() => (route = 'group_posts')}>[GROUP POSTS]</button>
 			<button on:click={() => (route = 'groups')}>[GROUPS]</button>
+			<button on:click={() => (route = 'profile')}>[PROFILE]</button>
 		</nav>
 		{#if route == 'posts'}
 			{#each posts as post, index (post.post_id)}
@@ -107,6 +110,8 @@
 			{#each group_posts as gPost, index (gPost.post_id)}
 				<Post post={gPost} />
 			{/each}
+		{:else if route == 'profile'}
+			<Profile />
 		{/if}
 	</div>
 </div>

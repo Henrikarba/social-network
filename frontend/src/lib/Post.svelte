@@ -1,7 +1,12 @@
 <script>
+	// Icons
+	import FaRegArrowAltCircleDown from 'svelte-icons/fa/FaRegArrowAltCircleDown.svelte'
+	import FaArrowUp from 'svelte-icons/fa/FaArrowUp.svelte'
+
 	import Comment from './Comment.svelte'
 
 	import { slide, fly } from 'svelte/transition'
+	import { circIn } from 'svelte/easing'
 	import { formatTime } from '../utils'
 	export let post
 	let content = post.content
@@ -17,7 +22,13 @@
 		showComments = !showComments
 	}
 
-	$: console.log(post)
+	let error = false
+	let commentContent = ''
+	function submitComment() {
+		if (commentContent.trim() == '') {
+			error = true
+		}
+	}
 </script>
 
 <div
@@ -44,18 +55,51 @@
 		</div>
 	</article>
 	<div class=" text-zinc-800 font-bold w-full text-center">
-		<h2 class="cursor-pointer" on:click={toggleComments}>{post?.comments ? post.comments.length : ''} comments</h2>
-
+		<div class="flex">
+			<h2 class="cursor-pointer" on:click={toggleComments}>{post?.comments ? post.comments.length : ''} comments</h2>
+			<div class="w-6">
+				{#if showComments}
+					<FaRegArrowAltCircleDown />
+				{:else}
+					<FaArrowUp />
+				{/if}
+			</div>
+		</div>
 		{#if showComments}
 			<div transition:slide={{ axis: 'y' }}>
-				<input type="text" placeholder="Type here" class="input w-full max-w-xs" />
-				<button class="btn">Submit</button>
+				<div class="flex flex-col gap-1">
+					<input
+						type="text"
+						placeholder={error ? 'try to do better' : 'Type here'}
+						class="input w-96 {error ? 'border-2 border-red-700 w-[90%] ml-6' : ''}"
+						bind:value={commentContent}
+					/>
+					<input type="file" class="file-input w-full max-w-xs" />
+					<button on:click={submitComment} class="btn w-20">Submit</button>
+				</div>
 				{#if post?.comments}
 					{#each post.comments as comment, index (comment.ID)}
 						<Comment {comment} />
 					{/each}
 				{:else}
 					<h2>Be the first one to comment!</h2>
+				{/if}
+				{#if error}
+					<div transition:slide={{ duration: 1000, axis: 'x', easing: circIn }} class="alert alert-error w-96">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="stroke-current shrink-0 h-6 w-6"
+							fill="none"
+							viewBox="0 0 24 24"
+							><path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+							/></svg
+						>
+						<span class="text-red-600">Error! Task failed successfully.</span>
+					</div>
 				{/if}
 			</div>
 		{/if}
