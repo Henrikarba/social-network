@@ -29,46 +29,8 @@
 		}
 	}
 
-	// $: followers = $currentUserFollowers.filter((item) => item.status == 'accepted')
-	let followers = [
-		{
-			'id': 1,
-			'first_name': 'Linus',
-			'last_name': 'Torvalds',
-			'privacy': 0,
-			'status': 'accepted',
-		},
-		{
-			'id': 2,
-			'first_name': 'Blue',
-			'last_name': 'Torvalds',
-			'privacy': 0,
-			'status': 'accepted',
-		},
-		{
-			'id': 3,
-			'first_name': 'Blue',
-			'last_name': 'Torvalds',
-			'privacy': 0,
-			'status': 'accepted',
-		},
-		{
-			'id': 4,
-			'first_name': 'Blue',
-			'last_name': 'Torvalds',
-			'privacy': 0,
-			'status': 'accepted',
-		},
-		{
-			'id': 5,
-			'first_name': 'Blue',
-			'last_name': 'Greek',
-			'privacy': 0,
-			'status': 'accepted',
-		},
-	]
-
-	let localFollowers = followers
+	$: followers = $currentUserFollowers ? $currentUserFollowers.filter((item) => item.status == 'accepted') : []
+	let localFollowers = [followers]
 	let postFollowers = []
 </script>
 
@@ -93,7 +55,9 @@
 					<div class="text-accent text-4xl">Privacy setting</div>
 					<div
 						class="tooltip"
-						data-tip="Everyone can see public posts. Private posts can be seen only by your followers. Privatus Maximus lets you pick specific followers who can see your post"
+						data-tip={followers.length > 0
+							? 'Everyone can see public posts. Private posts can be seen only by your followers. Privatus Maximus lets you pick specific followers who can see your post'
+							: 'You can only make public posts as you have no followers'}
 					>
 						<div class="w-8 text-warning mt-2 ml-2"><FaRegQuestionCircle /></div>
 					</div>
@@ -101,30 +65,34 @@
 
 				<label class="text-info" for="privacy">Public</label>
 				<input bind:group={privacy} type="radio" name="privacy" class="radio radio-error" value="public" />
-				<label class="text-info ml-4" for="privacy">Private</label>
-				<input bind:group={privacy} type="radio" name="privacy" class="radio radio-error" value="private" />
-				<label class="text-info ml-4" for="privacy">Privatus Maximus</label>
-				<input bind:group={privacy} type="radio" name="privacy" class="radio radio-error" value="followers_only" />
+				{#if followers && followers.length > 0}
+					<label class="text-info ml-4" for="privacy">Private</label>
+					<input bind:group={privacy} type="radio" name="privacy" class="radio radio-error" value="private" />
+					<label class="text-info ml-4" for="privacy">Privatus Maximus</label>
+					<input bind:group={privacy} type="radio" name="privacy" class="radio radio-error" value="followers_only" />
+				{/if}
 			</div>
 			{#if privacy == 'followers_only'}
 				<div
 					in:slide|global={{ delay: 300, duration: 300, easing: quintIn }}
 					out:slide|global={{ delay: 100, duration: 300, easing: quintInOut }}
 				>
-					<div class=" rounded w-full flex items-center flex-wrap gap-2">
+					<div class="rounded w-full flex items-center flex-wrap gap-2">
 						<ul>
 							{#each [localFollowers, postFollowers] as follower, index}
 								<h2 class="text-info text-4xl mt-4">{index === 0 ? 'Your followers' : 'Post followers'}</h2>
-								{#if index == 0}
-									<p class="text-accent">Click on follower to add them to post followers</p>
-								{/if}
+
+								<p class="text-accent">
+									{index === 0 ? 'Click on follower to add them to post followers' : 'Click to remove'}
+								</p>
+
 								<ul class="h-10 flex gap-2">
 									{#each follower as foll, index (foll.id)}
 										<!-- svelte-ignore a11y-click-events-have-key-events -->
 										<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 										<li
-											class="badge mt-2 cursor-pointer"
-											animate:flip={{ duration: 200 }}
+											class="badge py-6 mt-2 cursor-pointer"
+											animate:flip={{ duration: 500 }}
 											on:click={() => handlePostFollowers(foll.id)}
 										>
 											{foll.first_name}
