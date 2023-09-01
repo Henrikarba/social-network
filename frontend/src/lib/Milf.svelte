@@ -1,4 +1,6 @@
 <script>
+	import { createEventDispatcher } from 'svelte'
+	const dispatch = createEventDispatcher()
 	const milf = new URL('../assets/milfs.webp', import.meta.url).href
 
 	const positions = [
@@ -13,12 +15,19 @@
 	function getRandomPositionIndex() {
 		return Math.floor(Math.random() * positions.length)
 	}
-
+	let counter = 0
 	function nextPosition() {
+		counter++
 		currentPosition = (currentPosition + 1) % positions.length
+	}
+
+	$: if (counter == 5) {
+		counter = 0
+		dispatch('rotate')
 	}
 </script>
 
+<!-- svelte-ignore a11y-mouse-events-have-key-events -->
 <img
 	src={milf}
 	alt="milf"

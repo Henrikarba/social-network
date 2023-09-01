@@ -156,7 +156,7 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		s.writeMu.Lock()
 		conn.WriteJSON(response)
 		s.writeMu.Unlock()
-
+		break
 	case "get_chat":
 		var req models.Message
 		decoder := json.NewDecoder(bytes.NewReader(msg.Data))
@@ -194,5 +194,6 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		req.SenderID = id
 		req.ID = int(resultid)
 		s.broadcast <- req
+		break
 	}
 }

@@ -43,6 +43,7 @@
 
 	function bsod() {
 		setTimeout(() => {
+			pizdec = false
 			loading = true
 		}, 1500)
 		setTimeout(() => {
@@ -50,42 +51,47 @@
 		}, 3000)
 	}
 
+	let pizdec = false
+
 	$: authenticated = $isAuthenticated
+	$: if (pizdec) bsod()
 </script>
 
-{#if authenticated && !loading}
-	<Milf />
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div on:click={() => (last = 'msn')}>
-		<Shortcut imgurl={msnUrl} left={300} on:open={openMSN}>MSN</Shortcut>
-	</div>
-
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div on:click={() => (last = 'ie')}>
-		<Shortcut imgurl={ieUrl} left={200} on:open={openIE}>Internet Explorer</Shortcut>
-	</div>
-	<Footer on:bsod={bsod} />
-
-	{#if ieOpen}
-		<div>
-			<IE {ieUrl} on:close={openIE} on:last={zindex} z={last == 'ie' ? 'z-top' : 'z-low'} />
+<main style={pizdec ? 'transform: rotate(180deg)' : ''}>
+	{#if authenticated && !loading}
+		<Milf on:rotate={() => (pizdec = true)} />
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<div on:click={() => (last = 'msn')}>
+			<Shortcut imgurl={msnUrl} left={300} on:open={openMSN}>MSN</Shortcut>
 		</div>
-	{/if}
-	{#if msnOpen}
-		<div>
-			<MSN {msnUrl} on:close={openMSN} on:last={zindex} z={last == 'msn' ? 'z-top' : 'z-low'} />
-		</div>
-	{/if}
-{/if}
 
-{#if !loading && !authenticated}
-	<Login />
-{/if}
-{#if loading}
-	<div out:fade={{ duration: 300 }} class="loader" />
-{/if}
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<div on:click={() => (last = 'ie')}>
+			<Shortcut imgurl={ieUrl} left={200} on:open={openIE}>Internet Explorer</Shortcut>
+		</div>
+		<Footer on:bsod={bsod} />
+
+		{#if ieOpen}
+			<div>
+				<IE {ieUrl} on:close={openIE} on:last={zindex} z={last == 'ie' ? 'z-top' : 'z-low'} />
+			</div>
+		{/if}
+		{#if msnOpen}
+			<div>
+				<MSN {msnUrl} on:close={openMSN} on:last={zindex} z={last == 'msn' ? 'z-top' : 'z-low'} />
+			</div>
+		{/if}
+	{/if}
+
+	{#if !loading && !authenticated}
+		<Login />
+	{/if}
+	{#if loading}
+		<div out:fade={{ duration: 300 }} class="loader" />
+	{/if}
+</main>
 
 <style>
 	.loader {

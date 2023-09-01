@@ -43,18 +43,19 @@
 	<article class="prose">
 		<h2 class="font-bold text-4xl text-center">{post.title}</h2>
 		<p class="text-center">
-			Posted by <span
-				on:click={() => dispatch('user', post.created_by.id)}
-				class="cursor-pointer font-bold text-violet-800"
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
+			Posted by
+			<!-- svelte-ignore a11y-no-static-element-interactions -->
+			<span on:click={() => dispatch('user', post.created_by.id)} class="cursor-pointer font-bold text-violet-800"
 				>{post.created_by.first_name}
 				{post.created_by.last_name}</span
 			>
 			on {formatTime(post.created_at)}
 			{#if post.group}
-				in <span
-					on:click={() => dispatch('group', post.group.id)}
-					class="cursor-pointer text-orange-600 font-extrabold"
-				>
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				in
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<span on:click={() => dispatch('group', post.group.id)} class="cursor-pointer text-orange-600 font-extrabold">
 					{post.group.title}
 				</span>
 			{/if}
@@ -71,6 +72,8 @@
 	</article>
 	<div class=" text-zinc-800 font-bold w-full text-center">
 		<div class="flex">
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
+			<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 			<h2 class="cursor-pointer" on:click={toggleComments}>{post?.comments ? post.comments.length : ''} comments</h2>
 			<div class="w-6">
 				{#if showComments}

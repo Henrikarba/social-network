@@ -10,6 +10,7 @@
 	import Profile from './Profile.svelte'
 	import Post from './Post.svelte'
 	import ViewProfile from './ViewProfile.svelte'
+	import NewPost from './NewPost.svelte'
 
 	// Icons
 	import FaRegWindowClose from 'svelte-icons/fa/FaRegWindowClose.svelte'
@@ -133,6 +134,11 @@
 			<button on:click={() => (route = 'groups')}>[GROUPS]</button>
 			<button on:click={() => (route = 'profile')}>[PROFILE]</button>
 		</nav>
+		{#if route == 'posts' || route == 'group_posts'}
+			<div class="flex justify-center">
+				<button class="btn btn-ghost mt-4" on:click={() => (route = 'post/new')}>Create New PoSt</button>
+			</div>
+		{/if}
 		{#if route == 'posts'}
 			{#each posts as post, index (post.post_id)}
 				<Post {post} on:user={onClick} />
@@ -145,6 +151,8 @@
 			<Profile on:user={onClick} on:scroll={scroll} />
 		{:else if route == 'user/' + id}
 			<ViewProfile {profile} on:user={onClick} />
+		{:else if route == 'post/new'}
+			<NewPost />
 		{/if}
 	</div>
 </div>
