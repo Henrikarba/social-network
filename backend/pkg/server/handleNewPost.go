@@ -77,20 +77,13 @@ func (s *Server) newPostHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error adding new post %v", err)
 	}
 
-	var url string
-	if postData.PostTarget == "regular_post" {
-		url = "/post/" + strconv.Itoa(result.PostID)
-	} else if postData.PostTarget == "group_post" {
-		url = "/groups/post/" + strconv.Itoa(result.PostID)
-	}
 	response := struct {
-		PostID  int    `json:"post_id"`
-		Message string `json:"message"`
-		Url     string `json:"url"`
+		Message string              `json:"message"`
+		Post    models.PostResponse `json:"post"`
 	}{
-		PostID:  result.PostID,
+
 		Message: "Post created successfully",
-		Url:     url,
+		Post:    *result,
 	}
 
 	jsonResponse, err := json.Marshal(response)

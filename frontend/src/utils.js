@@ -44,3 +44,7 @@ export async function getProfile(id) {
 		socket.send(JSON.stringify(requestData))
 	})
 }
+
+export function isValidFileType(fileType) {
+	return fileType === 'image/png' || fileType === 'image/jpeg' || fileType === 'image/jpg' || fileType === 'image/gif'
+}

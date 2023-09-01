@@ -34,9 +34,8 @@ type PostResponse struct {
 	CreatedAt string `json:"created_at,omitempty" db:"created_at"`
 	UpdatedAt string `json:"updated_at,omitempty" db:"updated_at"`
 
-	PostTarget string `json:"post_target" schema:"post_target"`
-	Group      *Group `json:"group,omitempty"`
-	CreatedBy  *User  `json:"created_by,omitempty"`
+	Group     *Group `json:"group,omitempty"`
+	CreatedBy *User  `json:"created_by,omitempty"`
 }
 
 func GetPost(userid int, postID int, db *sqlx.DB) (*PostResponse, error) {

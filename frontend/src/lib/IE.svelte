@@ -21,6 +21,10 @@
 	import { postsStore, groupPostsStore } from '../stores/post'
 	import { currentUser } from '../stores/user'
 
+	// ADS
+	const ads = new URL('../assets/ads.png', import.meta.url).href
+	const fb = new URL('../assets/fakebook.png', import.meta.url).href
+
 	// utils
 	import { getProfile } from '../utils'
 
@@ -128,6 +132,7 @@
 		</div>
 	</div>
 	<div class="{'full ? h-[88%] : h-[635px]'} overflow-y-scroll overflow-x-hidden bg-slate-100 p-6" bind:this={ie}>
+		<img src={fb} class="h-20" alt="fakebook" />
 		<nav class="flex items-center justify-center gap-4 font-bold text-4xl border-b-4 border-slate-900">
 			<button on:click={() => (route = 'posts')}>[POSTS]</button>
 			<button on:click={() => (route = 'group_posts')}>[GROUP POSTS]</button>
@@ -152,8 +157,12 @@
 		{:else if route == 'user/' + id}
 			<ViewProfile {profile} on:user={onClick} />
 		{:else if route == 'post/new'}
-			<NewPost />
+			<NewPost on:regular_post={() => (route = 'posts')} on:group_post={() => (route = 'group_posts')} />
 		{/if}
+		<div class="flex justify-center flex-col items-center">
+			<div class="mt-10">ADVERTISEMENT/SPONSORED CONTENT:</div>
+			<img src={ads} alt="" />
+		</div>
 	</div>
 </div>
 <svelte:window on:mouseup={onMouseUp} on:mousemove={onMouseMove} />

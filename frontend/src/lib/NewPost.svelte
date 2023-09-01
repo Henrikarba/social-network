@@ -3,15 +3,28 @@
 	import { slide } from 'svelte/transition'
 	import { quintIn, quintInOut } from 'svelte/easing'
 	import { flip } from 'svelte/animate'
-
+	import { createEventDispatcher } from 'svelte'
+	const dispatch = createEventDispatcher()
 	// Icons
 	import FaRegQuestionCircle from 'svelte-icons/fa/FaRegQuestionCircle.svelte'
 
 	// Stores
-	import { currentUserGroups, currentUserFollowers } from '../stores/user'
+	import { currentUserGroups, currentUserFollowers, currentUser } from '../stores/user'
+	import { postsStore, groupPostsStore } from '../stores/post'
+
+	// Utils
+	import { isValidFileType } from '../utils'
 
 	let post_target = 'regular_post'
 	let privacy = 'public'
+
+	//
+	let disabled = true
+	let title = ''
+	let content = ''
+	let files
+	let selectedGroup
+	let buttonToolTipError
 
 	function handlePostFollowers(followerId) {
 		const followerIndex = localFollowers.findIndex((f) => f.id === followerId)
@@ -29,9 +42,81 @@
 		}
 	}
 
+	async function submitForm() {
+		if (!disabled) {
+			const formData = new FormData()
+			formData.append('title', title)
+			formData.append('content', content)
+			formData.append('privacy', privacy)
+			formData.append('post_target', post_target)
+			if (files && files[0] && isValidFileType(files[0].type)) {
+				formData.append('image', files[0])
+			}
+			if (privacy === '2' && postFollowers.length > 0) {
+				const followerIds = postFollowers.map((follower) => follower.id)
+				formData.append('followers', JSON.stringify(followerIds))
+			}
+			if (post_target == 'group_post') {
+				formData.append('groupid', selectedGroup)
+			}
+
+			const result = await handleNewPost(formData)
+			result.post.created_by = $currentUser
+			result.post.created_at = new Date()
+			result.post.group = $currentUserGroups.find((item) => item.id == parseInt(selectedGroup))
+			post_target == 'regular_post'
+				? ($postsStore = [result.post, ...$postsStore])
+				: ($groupPostsStore = [result.post, ...$groupPostsStore])
+		}
+
+		dispatch(post_target)
+	}
+
+	async function handleNewPost(formData) {
+		try {
+			const response = await fetch(`http://localhost:80/new/post`, {
+				method: 'POST',
+				body: formData,
+				credentials: 'include',
+			})
+			if (!response.ok) {
+				const errorMessage = await response.text()
+				throw new Error(`Request failed: ${errorMessage}`)
+			}
+			return await response.json()
+		} catch (error) {
+			throw error
+		}
+	}
+	$: console.log($currentUser)
 	$: followers = $currentUserFollowers ? $currentUserFollowers.filter((item) => item.status == 'accepted') : []
-	let localFollowers = [followers]
+	$: localFollowers = followers
 	let postFollowers = []
+	// Validate
+	$: {
+		const hasTitleAndContent = title && content
+		const hasPostFollowers = postFollowers.length > 0
+		buttonToolTipError = ''
+		if (privacy === '2') {
+			disabled = !hasTitleAndContent || !hasPostFollowers
+			buttonToolTipError = !hasPostFollowers
+				? 'Add some followers to your post or choose another privacy setting!'
+				: 'Add some content to your post.'
+		} else {
+			disabled = !hasTitleAndContent
+			buttonToolTipError = 'Add some content to your post.'
+		}
+		if (post_target == 'group_post' && isNaN(selectedGroup)) {
+			disabled = !hasTitleAndContent
+			buttonToolTipError = 'Pick a group or make regular post!'
+		}
+		if (files && files[0]) {
+			if (!isValidFileType(files[0].type)) {
+				disabled = true
+				buttonToolTipError = 'Supported formats: .png, .jpg, .jpeg, .gif'
+			}
+		}
+	}
 </script>
 
 <main data-theme="dracula" class="bg-base-100 mt-4 rounded h-[100vh] p-10 flex gap-4">
@@ -111,12 +196,38 @@
 				out:slide|global={{ delay: 100, duration: 300, easing: quintInOut }}
 			>
 				<div class="text-accent text-4xl">Select group</div>
-				<select class="select select-info w-full max-w-xs mt-4 text-white">
+				<select class="select select-info w-full max-w-xs mt-4 text-white" bind:value={selectedGroup}>
 					{#each $currentUserGroups as group}
 						<option value={group.id}>{group.title}</option>
 					{/each}
 				</select>
 			</div>
 		{/if}
+	</div>
+	<div class="flex flex-col gap-2 w-2/3">
+		<label for="title" class="text-xl text-info uppercase">Title</label>
+		<input
+			type="text"
+			bind:value={title}
+			placeholder="Title of your post"
+			class="input w-full max-w focus:border-accent focus:outline-none border-2 border-primary text-accent"
+		/>
+		<label for="content" class="text-xl text-info uppercase">Content</label>
+		<textarea
+			bind:value={content}
+			placeholder="Content of your post"
+			class="textarea textarea-bordered textarea-lg w-full resize-none h-60 focus:border-accent focus:outline-none border-2 border-primary text-accent"
+		/>
+		<div class="flex justify-between">
+			<input
+				bind:files
+				type="file"
+				class="file-input file-input-accent w-full max-w-xs text-primary"
+				accept=".png, .jpg, .jpeg, .gif"
+			/>
+			<div class={disabled ? 'tooltip tooltip-hover tooltip-left' : ''} data-tip={buttonToolTipError}>
+				<button on:click={submitForm} class="btn btn-success font-bold" {disabled}>Submit</button>
+			</div>
+		</div>
 	</div>
 </main>
