@@ -6,9 +6,10 @@
 	let email
 	let password
 	let logging = false
-
+	let msg = ''
 	async function login() {
 		logging = true
+		msg = '........logging in....'
 		console.log(email, password)
 		const creds = {
 			email: email,
@@ -24,28 +25,17 @@
 				credentials: 'include', // Important
 			})
 			if (!response.ok) {
+				msg = 'an error occured when trying to display error'
 				throw new Error('Network response was not ok')
 			}
 			createWebSocket()
 		} catch (error) {
+			msg = 'an error occured when trying to display error'
 			console.error('Error:', error)
 		}
 	}
 </script>
 
-{#if logging}
-	<div class="alert bg-red-500">
-		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info shrink-0 w-6 h-6"
-			><path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-			/></svg
-		>
-		<span>logging innnnnn</span>
-	</div>
-{/if}
 <main>
 	<div class=" h-64 w-4/12 select-none" in:fade|global={{ duration: 500 }} out:fly|global={{ duration: 300, x: 800 }}>
 		<div
@@ -77,8 +67,11 @@
 					class="input w-full max-w-xs h-8 bg-white focus:outline-none"
 				/>
 			</div>
-			<div>
+			<div class="flex flex-col">
 				<button class="btn" on:click={login}>LOGIN</button>
+				{#if logging}
+					<h2 class="text-xl text-red-700 font-extrabold">{msg}</h2>
+				{/if}
 			</div>
 		</div>
 	</div>

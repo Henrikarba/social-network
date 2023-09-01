@@ -10,6 +10,7 @@
 	import IE from './lib/IE.svelte'
 	import MSN from './lib/MSN.svelte'
 	import Login from './lib/Login.svelte'
+	import Milf from './lib/Milf.svelte'
 
 	const msnUrl = new URL('./assets/msn.png', import.meta.url).href
 	const ieUrl = new URL('./assets/ie.png', import.meta.url).href
@@ -53,6 +54,7 @@
 </script>
 
 {#if authenticated && !loading}
+	<Milf />
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div on:click={() => (last = 'msn')}>
@@ -62,7 +64,7 @@
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div on:click={() => (last = 'ie')}>
-		<Shortcut imgurl={ieUrl} left={100} on:open={openIE}>Internet Explorer</Shortcut>
+		<Shortcut imgurl={ieUrl} left={200} on:open={openIE}>Internet Explorer</Shortcut>
 	</div>
 	<Footer on:bsod={bsod} />
 

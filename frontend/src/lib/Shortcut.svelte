@@ -5,7 +5,7 @@
 	export let imgurl
 
 	export let left = 100
-	export let top = 100
+	export let top = 200
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
