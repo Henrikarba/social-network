@@ -8,7 +8,7 @@
 		{ top: '0', right: '0' },
 		{ top: '200px', left: '100px' },
 	]
-	let currentPosition = 0
+	let currentPosition = getRandomPositionIndex()
 
 	function getRandomPositionIndex() {
 		return Math.floor(Math.random() * positions.length)
