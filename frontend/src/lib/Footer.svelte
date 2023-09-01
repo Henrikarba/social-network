@@ -1,8 +1,10 @@
 <script>
+	import { createEventDispatcher } from 'svelte'
 	import { onMount } from 'svelte'
 	import FaWindows from 'svelte-icons/fa/FaWindows.svelte'
 	import FaAngleUp from 'svelte-icons/fa/FaAngleUp.svelte'
 	let time = new Date()
+	const dispatch = createEventDispatcher()
 
 	onMount(() => {
 		const interval = setInterval(() => {
@@ -19,28 +21,32 @@
 	$: currentTime = `${time.getHours()}:${time.getMinutes().toString().padStart(2, '0')}`
 </script>
 
-<div
-	class="select-none shadow fixed bottom-0 left-0 h-10 w-full bg-gradient-to-r from-sky-500 to-blue-700 border-t-2 border-blue-900 flex z-40"
->
-	<button
-		class="h-full w-32 px-2 bg-gradient-to-r from-green-700 to-green-800 rounded-r-lg"
-		on:click={() => (bsod = true)}
+{#if !bsod}
+	<div
+		class="select-none shadow fixed bottom-0 left-0 h-10 w-full bg-gradient-to-r from-sky-500 to-blue-700 border-t-2 border-blue-900 flex z-[9999999999]"
 	>
-		<div class="flex items-center justify-center gap-2">
-			<div class="h-6 w-6 text-slate-200"><FaWindows /></div>
-			<p class="text-slate-300 uppercase font-bold">Start</p>
-		</div>
-	</button>
+		<button
+			class="h-full w-32 px-2 bg-gradient-to-r from-green-700 to-green-800 rounded-r-lg"
+			on:click={() => {
+				bsod = true
+				dispatch('bsod')
+			}}
+		>
+			<div class="flex items-center justify-center gap-2">
+				<div class="h-6 w-6 text-slate-200"><FaWindows /></div>
+				<p class="text-slate-300 uppercase font-bold">Start</p>
+			</div>
+		</button>
 
-	<div class="flex justify-between w-full">
-		<div>hello</div>
-		<div class="flex justify-center items-center mr-6 text-gray-200">
-			<div class="w-6 h-6 mr-2 cursor-pointer"><FaAngleUp /></div>
-			<div>{currentTime}</div>
+		<div class="flex justify-between w-full">
+			<div>hello</div>
+			<div class="flex justify-center items-center mr-6 text-gray-200">
+				<div class="w-6 h-6 mr-2 cursor-pointer"><FaAngleUp /></div>
+				<div>{currentTime}</div>
+			</div>
 		</div>
 	</div>
-</div>
-
+{/if}
 {#if bsod}
 	<div class="bsod" />
 {/if}

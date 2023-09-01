@@ -9,7 +9,6 @@ import (
 )
 
 func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
-
 	var login models.UserRequest
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&login); err != nil {

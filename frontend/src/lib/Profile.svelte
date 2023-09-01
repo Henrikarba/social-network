@@ -1,4 +1,5 @@
 <script>
+	import { slide } from 'svelte/transition'
 	// Svelte
 	import { createEventDispatcher } from 'svelte'
 	const dispatch = createEventDispatcher()
@@ -14,8 +15,8 @@
 
 	let user = $currentUser
 	let groups = $currentUserGroups
-	let followers = $currentUserFollowers
-	let following = $currentUserFollowing
+	let followers = $currentUserFollowers ? $currentUserFollowers.filter((item) => item.status != 'pending') : []
+	let following = $currentUserFollowing ? $currentUserFollowing.filter((item) => item.status != 'pending') : []
 
 	// Birthday
 	let birthday = formatDateTime(user.date_of_birth)
@@ -64,7 +65,7 @@
 			{/if}
 		</div>
 		<div class="mt-2 border-2 border-zinc-400 p-4">
-			{#if followers}
+			{#if followers && followers.length > 0}
 				<h2 class="border-b-2 font-bold">My followers</h2>
 				{#each followers as follower, index (follower.id)}
 					<h2 on:click={() => dispatch('user', follower.id)} class="text-orange-800 cursor-pointer font-extrabold">
@@ -73,12 +74,12 @@
 					</h2>
 				{/each}
 			{:else}
-				<h2 class="border-b-2 font-bold">No followers!!1</h2>
+				<h2 class="border-b-2 font-bold">My impressive list of no one who follows me:</h2>
 			{/if}
 		</div>
 		<div class="mt-2 border-2 border-zinc-400 p-4">
 			{#if following}
-				<h2 class="border-b-2 font-bold">peepz who follow me</h2>
+				<h2 class="border-b-2 font-bold">I follow these interesting guys:</h2>
 				{#each following as follower, index (follower.id)}
 					<h2 on:click={() => dispatch('user', follower.id)} class="text-orange-800 cursor-pointer font-extrabold">
 						{follower.first_name}
@@ -90,11 +91,14 @@
 			{/if}
 		</div>
 	</div>
-	<div class="mt-6">
+	<div class="mt-6 flex flex-col justify-center items-center">
 		<h2>USE VPN?!</h2>
 		<div class="flex items-center">
 			<input
-				on:click={togglePrivacy}
+				on:click={() => {
+					togglePrivacy()
+					dispatch('scroll')
+				}}
 				bind:checked={user.privacy}
 				id="checked-checkbox"
 				type="checkbox"
@@ -102,14 +106,16 @@
 				class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
 			/>
 		</div>
-		<div>
-			{#if user.privacy == 0}
+		{#if user.privacy == 0}
+			<div class="flex items-center">
 				<h2>you are currently not using vpn and tor and blockchain and gfx card to hide your identity</h2>
-			{:else}
+			</div>
+		{:else}
+			<div>
 				<h2 class="text-4xl font-extrabold text-green-500">STATUS:</h2>
 				<img class="w-6/12" src={hackerman} alt="you are private citizen!" />
-			{/if}
-		</div>
+			</div>
+		{/if}
 	</div>
 </div>
 
