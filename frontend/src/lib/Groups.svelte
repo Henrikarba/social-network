@@ -1,4 +1,5 @@
 <script>
+	import { slide } from 'svelte/transition'
 	// Svelte
 	import { onMount } from 'svelte'
 	import { createEventDispatcher } from 'svelte'
@@ -15,7 +16,11 @@
 </script>
 
 {#if groups}
-	<div class="overflow-x-auto">
+	<div
+		class="overflow-x-auto"
+		in:slide|global={{ duration: 300, delay: 500, axis: 'y' }}
+		out:slide|global={{ duration: 200, axis: 'x' }}
+	>
 		<table class="table">
 			<!-- head -->
 			<thead>
