@@ -35,6 +35,8 @@
 	let files
 	let selectedGroup
 	let buttonToolTipError
+	let userGroups = $currentUserGroups.filter((group) => group.status == 'joined')
+	$: console.log($currentUserGroups)
 
 	onMount(() => title.focus())
 
@@ -215,7 +217,7 @@
 			>
 				<div class="text-accent text-4xl">Select group</div>
 				<select class="select select-info w-full max-w-xs mt-4 text-white" bind:value={selectedGroup}>
-					{#each $currentUserGroups as group}
+					{#each userGroups as group}
 						<option value={group.id}>{group.title}</option>
 					{/each}
 				</select>

@@ -37,7 +37,7 @@
 <div
 	in:slide|global={{ delay: 500, duration: 500, axis: 'y' }}
 	out:fly|global={{ duration: 500, x: 500 }}
-	class="flex flex-col border-2 border-black mt-4 rounded p-4 items-center"
+	class="flex flex-col border-2 border-black mt-4 rounded p-4 items-center bg-slate-300"
 >
 	<article class="prose">
 		<h2 class="font-bold text-4xl text-center">{post.title}</h2>

@@ -34,7 +34,7 @@
 	export let ieUrl
 	export let z
 
-	let left = 400
+	let left = 200
 	let top = 100
 	let full = false
 	let moving = false
@@ -49,7 +49,6 @@
 
 	let groupid
 	let group
-	async function getGroup(event) {}
 
 	// taskbar
 	function onMouseDown() {
@@ -174,7 +173,7 @@
 		{/if}
 		<div class="flex justify-center flex-col items-center">
 			<div class="mt-10">ADVERTISEMENT/SPONSORED CONTENT:</div>
-			<img src={ads} alt="" />
+			<img src={ads} alt="sponsored content" />
 		</div>
 	</div>
 </div>
