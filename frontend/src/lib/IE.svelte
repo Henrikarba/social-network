@@ -11,6 +11,7 @@
 	import Post from './Post.svelte'
 	import ViewProfile from './ViewProfile.svelte'
 	import NewPost from './NewPost.svelte'
+	import Groups from './Groups.svelte'
 
 	// Icons
 	import FaRegWindowClose from 'svelte-icons/fa/FaRegWindowClose.svelte'
@@ -158,6 +159,8 @@
 			<ViewProfile {profile} on:user={onClick} />
 		{:else if route == 'post/new'}
 			<NewPost on:regular_post={() => (route = 'posts')} on:group_post={() => (route = 'group_posts')} />
+		{:else if route == 'groups'}
+			<Groups />
 		{/if}
 		<div class="flex justify-center flex-col items-center">
 			<div class="mt-10">ADVERTISEMENT/SPONSORED CONTENT:</div>

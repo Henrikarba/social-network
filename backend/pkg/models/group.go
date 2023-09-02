@@ -7,14 +7,16 @@ import (
 )
 
 type Group struct {
-	ID          int            `json:"id,omitempty" db:"id"`
-	CreatorID   int            `json:"creator_id,omitempty" db:"creator_id"`
-	Title       string         `json:"title,omitempty" db:"title"`
-	Description string         `json:"description,omitempty" db:"description"`
-	CreatedAt   string         `json:"created_at,omitempty" db:"created_at"`
-	UpdatedAt   string         `json:"updated_at,omitempty" db:"updated_at"`
-	Members     []User         `json:"members,omitempty"`
-	Posts       []PostResponse `json:"posts,omitempty"`
+	ID          int    `json:"id,omitempty" db:"id"`
+	CreatorID   int    `json:"creator_id,omitempty" db:"creator_id"`
+	Title       string `json:"title,omitempty" db:"title"`
+	Description string `json:"description,omitempty" db:"description"`
+	CreatedAt   string `json:"created_at,omitempty" db:"created_at"`
+	UpdatedAt   string `json:"updated_at,omitempty" db:"updated_at"`
+
+	Status  string         `json:"status"`
+	Members []User         `json:"members,omitempty"`
+	Posts   []PostResponse `json:"posts,omitempty"`
 }
 type GroupMember struct {
 	ID        int    `db:"id"`
@@ -23,6 +25,19 @@ type GroupMember struct {
 	Status    string `db:"status"`
 	InvitedBy int    `json:"invited_by" db:"invited_by"`
 	JoinedAt  string `db:"joined_at"`
+}
+
+func GetAllGroups(db *sqlx.DB) ([]Group, error) {
+	query := "SELECT id, title, creator_id FROM groups"
+	var groups []Group
+
+	err := db.Select(&groups, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return groups, nil
+
 }
 
 func AcceptGroupJoinRequest(db *sqlx.DB, userid, senderid, groupid int) {

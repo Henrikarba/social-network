@@ -32,7 +32,6 @@
 			error = true
 		}
 	}
-	$: console.log(post)
 </script>
 
 <div

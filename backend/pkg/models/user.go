@@ -170,7 +170,7 @@ func GetAuthenticatedUserDate(db *sqlx.DB, id int) (*UserResponse, error) {
 
 	// Groups
 	groups, err := GetUserGroups(db, id)
-	profile.Groups = groups
+	profile.Groups = &groups
 
 	unread, _ := GetLastUnreadMessages(db, id)
 	profile.Messages = &unread
@@ -208,22 +208,48 @@ func GetPrivacySetting(db *sqlx.DB, id int) (int, error) {
 	return user.Privacy, nil
 }
 
-func GetUserGroups(db *sqlx.DB, id int) (*[]Group, error) {
+// GetUserGroups retrieves user's groups with status.
+func GetUserGroups(db *sqlx.DB, userID int) ([]Group, error) {
 	var groups []Group
 
 	groupIDsQuery := `
-		SELECT group_id
-		FROM group_members
-		WHERE user_id = ? AND status = 'joined'`
-	var groupIDs []int
-	err := db.Select(&groupIDs, groupIDsQuery, id)
+        SELECT group_id, status
+        FROM group_members
+        WHERE user_id = ?`
+
+	// Define a struct to hold the results of the query
+	type GroupMember struct {
+		GroupID int    `db:"group_id"`
+		Status  string `db:"status"`
+	}
+
+	var groupMembers []GroupMember
+
+	err := db.Select(&groupMembers, groupIDsQuery, userID)
 	if err != nil {
 		return nil, err
 	}
+
+	// Create a map to store status for each group
+	groupStatusMap := make(map[int]string)
+
+	// Populate the map with group statuses
+	for _, member := range groupMembers {
+		groupStatusMap[member.GroupID] = member.Status
+	}
+
+	// Fetch the groups based on the user's group IDs
 	query := `
-		SELECT id, title
-		FROM groups
-		WHERE id IN (?)`
+        SELECT id, title, creator_id
+        FROM groups
+        WHERE id IN (?)`
+
+	// Prepare the list of group IDs from the map
+	var groupIDs []int
+	for groupID := range groupStatusMap {
+		groupIDs = append(groupIDs, groupID)
+	}
+
 	query, args, err := sqlx.In(query, groupIDs)
 	if err != nil {
 		return nil, err
@@ -235,7 +261,15 @@ func GetUserGroups(db *sqlx.DB, id int) (*[]Group, error) {
 		return nil, err
 	}
 
-	return &groups, nil
+	// Append the status to the corresponding Group structs
+	for i, group := range groups {
+		status, ok := groupStatusMap[group.ID]
+		if ok {
+			groups[i].Status = status
+		}
+	}
+
+	return groups, nil
 }
 
 func TogglePrivacy(db *sqlx.DB, userid int) error {

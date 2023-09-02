@@ -179,6 +179,21 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		s.writeMu.Unlock()
 		break
 
+	case "get_groups":
+		groups, _ := models.GetAllGroups(s.db.DB)
+		fmt.Println(groups)
+		groupBytes, _ := json.Marshal(groups)
+
+		groupRaw := json.RawMessage(groupBytes)
+
+		response := WebSocketMessage{
+			Action: "get_groups",
+			Data:   groupRaw,
+		}
+		s.writeMu.Lock()
+		conn.WriteJSON(response)
+		s.writeMu.Unlock()
+
 	case "new_message":
 		var req models.Message
 		decoder := json.NewDecoder(bytes.NewReader(msg.Data))

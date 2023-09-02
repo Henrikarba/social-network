@@ -4,9 +4,19 @@
 	import { quintIn, quintInOut } from 'svelte/easing'
 	import { flip } from 'svelte/animate'
 	import { createEventDispatcher } from 'svelte'
+	import { onMount } from 'svelte'
 	const dispatch = createEventDispatcher()
+
 	// Icons
 	import FaRegQuestionCircle from 'svelte-icons/fa/FaRegQuestionCircle.svelte'
+
+	// Emoji
+	import Emoji from './Emoji.svelte'
+
+	let selectedInput
+	function handleCurrentInput(event) {
+		selectedInput = event.target
+	}
 
 	// Stores
 	import { currentUserGroups, currentUserFollowers, currentUser } from '../stores/user'
@@ -20,11 +30,13 @@
 
 	//
 	let disabled = true
-	let title = ''
+	let title
 	let content = ''
 	let files
 	let selectedGroup
 	let buttonToolTipError
+
+	onMount(() => title.focus())
 
 	function handlePostFollowers(followerId) {
 		const followerIndex = localFollowers.findIndex((f) => f.id === followerId)
@@ -45,7 +57,7 @@
 	async function submitForm() {
 		if (!disabled) {
 			const formData = new FormData()
-			formData.append('title', title)
+			formData.append('title', title.value)
 			formData.append('content', content)
 			formData.append('privacy', privacy)
 			formData.append('post_target', post_target)
@@ -88,9 +100,10 @@
 			throw error
 		}
 	}
-	$: console.log($currentUser)
+
 	$: followers = $currentUserFollowers ? $currentUserFollowers.filter((item) => item.status == 'accepted') : []
 	$: localFollowers = followers
+
 	let postFollowers = []
 	// Validate
 	$: {
@@ -119,7 +132,12 @@
 	}
 </script>
 
-<main data-theme="dracula" class="bg-base-100 mt-4 rounded h-[100vh] p-10 flex gap-4">
+<main
+	data-theme="dracula"
+	class="bg-base-100 mt-4 rounded-3xl h-[100vh] p-10 flex gap-4"
+	in:slide|global={{ delay: 500, duration: 200, axis: 'y' }}
+	out:slide|global={{ duration: 200, axis: 'x' }}
+>
 	<div class="w-1/3 flex flex-col gap-4">
 		<div>
 			<div class="text-accent text-4xl">General/Group post</div>
@@ -203,17 +221,22 @@
 				</select>
 			</div>
 		{/if}
+		<div class="w-full h-96 mt-4">
+			<Emoji input={selectedInput} />
+		</div>
 	</div>
 	<div class="flex flex-col gap-2 w-2/3">
 		<label for="title" class="text-xl text-info uppercase">Title</label>
 		<input
+			on:focus={handleCurrentInput}
 			type="text"
-			bind:value={title}
+			bind:this={title}
 			placeholder="Title of your post"
 			class="input w-full max-w focus:border-accent focus:outline-none border-2 border-primary text-accent"
 		/>
 		<label for="content" class="text-xl text-info uppercase">Content</label>
 		<textarea
+			on:focus={handleCurrentInput}
 			bind:value={content}
 			placeholder="Content of your post"
 			class="textarea textarea-bordered textarea-lg w-full resize-none h-60 focus:border-accent focus:outline-none border-2 border-primary text-accent"
