@@ -192,6 +192,7 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		s.writeMu.Lock()
 		conn.WriteJSON(response)
 		s.writeMu.Unlock()
+		break
 
 	case "get_group":
 		var req models.Group
@@ -214,6 +215,15 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		s.writeMu.Unlock()
 		break
 
+	case "join_group":
+		var req models.Group
+		decoder := json.NewDecoder(bytes.NewReader(msg.Data))
+		err := decoder.Decode(&req)
+		if err != nil {
+			log.Printf("joining group %v: ", err)
+		}
+		models.JoinGroup(s.db.DB, id, req.CreatorID, req.ID)
+		break
 	case "new_message":
 		var req models.Message
 		decoder := json.NewDecoder(bytes.NewReader(msg.Data))
@@ -230,5 +240,6 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		req.ID = int(resultid)
 		s.broadcast <- req
 		break
+
 	}
 }

@@ -10,7 +10,7 @@
 
 	import { slide, fly } from 'svelte/transition'
 	import { circIn } from 'svelte/easing'
-	import { formatTime } from '../utils'
+	import { formatTime, isValidFileType } from '../utils'
 	export let post
 	let content = post.content
 
@@ -27,10 +27,49 @@
 
 	let error = false
 	let commentContent = ''
-	function submitComment() {
+	let files
+	async function handleNewComment(formData) {
+		try {
+			const response = await fetch(`http://localhost:80/new/comment`, {
+				method: 'POST',
+				body: formData,
+				credentials: 'include',
+			})
+			if (!response.ok) {
+				const errorMessage = await response.text()
+				throw new Error(`Request failed: ${errorMessage}`)
+			}
+			return await response.json()
+		} catch (error) {
+			throw error
+		}
+	}
+
+	async function submitComment() {
 		if (commentContent.trim() == '') {
 			error = true
 		}
+		let post_target = 'regular_post'
+		if (post?.group) {
+			post_target = 'group_post'
+		}
+
+		const formData = new FormData()
+
+		formData.append('content', commentContent)
+		formData.append('post_target', post_target)
+		formData.append('post_id', post.post_id)
+		if (post_target == 'group_post') {
+			formData.append('group_id', post.group.id)
+		}
+		if (files && files[0] && isValidFileType(files[0].type)) {
+			formData.append('image', files[0])
+		}
+
+		const result = await handleNewComment(formData)
+		if (!post?.comments) post.comments = []
+		post.comments = [...post.comments, result.comment]
+		commentContent = ''
 	}
 </script>
 
@@ -91,7 +130,12 @@
 						class="input w-96 {error ? 'border-2 border-red-700 w-[90%] ml-6' : ''}"
 						bind:value={commentContent}
 					/>
-					<input type="file" class="file-input w-full max-w-xs" />
+					<input
+						bind:files
+						type="file"
+						class="file-input file-input-accent w-full max-w-xs text-primary"
+						accept=".png, .jpg, .jpeg, .gif"
+					/>
 					<button on:click={submitComment} class="btn w-20">Submit</button>
 				</div>
 				{#if post?.comments}

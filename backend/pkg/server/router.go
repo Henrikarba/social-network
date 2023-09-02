@@ -14,6 +14,7 @@ func (s *Server) router() *http.ServeMux {
 	// New posts, logins, registration, etc.
 	authMiddleware := mw.AuthenticatedUser(s.db.DB)
 	r.Handle("/new/post", mw.Cors(authMiddleware(http.HandlerFunc(s.newPostHandler))))
+	r.Handle("/new/comment", mw.Cors(authMiddleware(http.HandlerFunc(s.newComment))))
 
 	// File server
 	fileHandler := http.StripPrefix("/images/", http.FileServer(http.Dir("./pkg/db/files/images")))

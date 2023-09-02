@@ -1,6 +1,7 @@
 <script>
 	import { slide } from 'svelte/transition'
 	import { currentUserGroups } from '../stores/user'
+	import { socket } from '../ws'
 	import { createEventDispatcher } from 'svelte'
 	const dispatch = createEventDispatcher()
 
@@ -11,10 +12,21 @@
 	let members = group.members.slice(1)
 
 	function joinGroup() {
+		if (memberStatus) return
+
 		const grp = group
-		grp.status = 'pending'
+		grp.status = 'requested'
 		$currentUserGroups = [...$currentUserGroups, grp]
 		found = null
+
+		const data = {
+			action: 'join_group',
+			data: {
+				id: group.id,
+				creator_id: group.creator_id,
+			},
+		}
+		socket.send(JSON.stringify(data))
 	}
 
 	$: found = $currentUserGroups.find((grp) => grp.id == group.id)
@@ -39,7 +51,7 @@
 					<button class="disabled btn btn-info hover:btn-accent" on:click={joinGroup}>Request to join</button>
 				</div>
 			{/if}
-			{#if memberStatus == 'pending'}
+			{#if memberStatus == 'requested'}
 				<div class="alert w-1/2 text-info font-extrabold" transition:slide={{ duration: 300, axis: 'y' }}>
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info shrink-0 w-6 h-6"
 						><path

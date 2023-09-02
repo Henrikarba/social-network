@@ -1,6 +1,9 @@
 package models
 
 import (
+	"social-network/pkg/utils"
+	"time"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -66,4 +69,49 @@ func GetCommentForGroupPost(db *sqlx.DB, postid int) ([]Comment, error) {
 	}
 
 	return comments, nil
+}
+
+func NewComment(p PostRequest, db *sqlx.DB) (*Comment, error) {
+	now := time.Now()
+	comment := &Comment{
+		PostID:    p.ID,
+		UserID:    p.CreatedBy,
+		Content:   p.Content,
+		CreatedAt: utils.FormatTime(&now),
+	}
+
+	var stmt string
+	switch p.PostTarget {
+	case "regular_post":
+		if p.ImageData != nil {
+			imagePath, err := utils.SaveImage(p.ImageData, p.MimeType, "comment")
+			if err != nil {
+				return nil, err
+			}
+			comment.ImageUrl = &imagePath
+		}
+
+		stmt = `INSERT INTO comments (post_id, user_id, content, image_url)
+			VALUES (:post_id, :user_id, :content, :image_url)`
+
+	case "group_post":
+		if p.ImageData != nil {
+			imagePath, err := utils.SaveImage(p.ImageData, p.MimeType, "comment")
+			if err != nil {
+				return nil, err
+			}
+			comment.ImageUrl = &imagePath
+		}
+
+		stmt = `INSERT INTO group_comments (post_id, user_id, content, image_url)
+			VALUES (:post_id, :user_id, :content, :image_url)`
+	}
+
+	result, err := db.NamedExec(stmt, comment)
+	if err != nil {
+		return nil, err
+	}
+	id, _ := result.LastInsertId()
+	comment.ID = int(id)
+	return comment, nil
 }

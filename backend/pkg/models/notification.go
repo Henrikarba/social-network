@@ -28,9 +28,8 @@ func NewNotification(db *sqlx.DB, userid, senderid int, status string, groupid i
 	var msg string
 	var notif_type string
 	defer func() {
-		if r := recover(); r != nil {
+		if err != nil {
 			tx.Rollback()
-			fmt.Printf("Transaction rolled back due to an error: %v", r)
 		}
 	}()
 	if groupid == 0 {
@@ -58,6 +57,10 @@ func NewNotification(db *sqlx.DB, userid, senderid int, status string, groupid i
 		} else if status == "rejected" {
 			msg = "rejected your request to join group"
 			notif_type = "group_join_accept"
+
+		} else if status == "group_join_request" {
+			msg = "wants to join your group"
+			notif_type = "group_join_request"
 		}
 		query := `INSERT INTO user_notifications (user_id, sender_id, type, message, group_id)
 		VALUES (?, ?, ?, ?, ?)`

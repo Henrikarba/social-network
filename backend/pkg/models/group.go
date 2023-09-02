@@ -38,7 +38,24 @@ func GetAllGroups(db *sqlx.DB) ([]Group, error) {
 	}
 
 	return groups, nil
+}
 
+func JoinGroup(db *sqlx.DB, userID, creatorID, groupID int) {
+	_, err := db.Exec(`
+		INSERT INTO group_members (group_id, user_id, status)
+		VALUES (?, ?, "requested")`,
+		groupID, userID)
+	if err != nil {
+		log.Printf("can't add group_join_request: %v", err)
+		return
+	}
+
+	// Create a notification for the group join request
+	err = NewNotification(db, userID, creatorID, "group_join_request", groupID)
+	if err != nil {
+		log.Printf("can't add group_join_request notification: %v", err)
+	}
+	log.Printf("group join request added successfully.")
 }
 
 func AcceptGroupJoinRequest(db *sqlx.DB, userid, senderid, groupid int) {
