@@ -97,7 +97,6 @@
 			<input
 				on:click={() => {
 					togglePrivacy()
-					dispatch('scroll')
 				}}
 				bind:checked={user.privacy}
 				id="checked-checkbox"

@@ -1,18 +1,13 @@
 <script>
 	import { slide } from 'svelte/transition'
 	// Svelte
-	import { onMount } from 'svelte'
 	import { createEventDispatcher } from 'svelte'
 	const dispatch = createEventDispatcher()
-
-	import { getGroups } from '../utils'
+	import { groupStore } from '../stores/groups'
+	import { formatTime } from '../utils'
 	import { currentUserGroups, currentUser } from '../stores/user'
-	let groups
 
-	$: console.log($currentUserGroups)
-	onMount(async () => {
-		groups = await getGroups()
-	})
+	$: groups = $groupStore
 </script>
 
 {#if groups}
@@ -28,6 +23,7 @@
 					<th />
 					<th>Name</th>
 					<th>Role</th>
+					<th>Created At</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -41,7 +37,10 @@
 							<td class="text-cyan-700 uppercase font-extrabold text-lg">Member</td>
 						{:else if $currentUserGroups.some((userGroup) => userGroup.id === group.id && userGroup.status == 'requested')}
 							<td class="text-orange-800 uppercase font-extrabold text-lg">Request pending...</td>
+						{:else}
+							<td>-</td>
 						{/if}
+						<td class="cursor-pointer font-extrabold">{formatTime(group.created_at)}</td>
 					</tr>
 				{/each}
 			</tbody>

@@ -18,6 +18,7 @@ type Group struct {
 	Members []User         `json:"members,omitempty"`
 	Posts   []PostResponse `json:"posts,omitempty"`
 }
+
 type GroupMember struct {
 	ID        int    `db:"id"`
 	GroupID   int    `json:"id" db:"group_id"`
@@ -28,7 +29,7 @@ type GroupMember struct {
 }
 
 func GetAllGroups(db *sqlx.DB) ([]Group, error) {
-	query := "SELECT id, title, creator_id FROM groups"
+	query := "SELECT id, title, creator_id, created_at FROM groups"
 	var groups []Group
 
 	err := db.Select(&groups, query)
@@ -68,12 +69,52 @@ func RejectGroupJoinRequest(db *sqlx.DB, userid, senderid, groupid int) {
 	log.Printf("group join request accepted successfully.")
 }
 
-func GetGroup(db *sqlx.DB, groupid int) *Group {
+func GetGroup(db *sqlx.DB, groupID int, userID int) *Group {
 	var group Group
-	err := db.Get(&group, "SELECT id, title FROM groups WHERE id = ?", groupid)
+	err := db.Get(&group, "SELECT * FROM groups WHERE id = ?", groupID)
 	if err != nil {
-		log.Printf("can't get group: %v", err)
+		log.Printf("selecting group: %v", err)
 		return nil
 	}
+	group.Members = []User{}
+	var members []User
+	err = db.Select(&members, `
+    SELECT u.id, u.first_name, u.last_name 
+    FROM users u
+    JOIN group_members gm ON u.id = gm.user_id
+    WHERE gm.group_id = ? AND gm.status = 'joined'`, groupID)
+	if err != nil {
+		log.Printf("selecting members: %v", err)
+		return nil
+	}
+	group.Members = members
+
+	// Check if the requesting user is a member of the group
+	isMember := false
+	for _, member := range members {
+		if member.ID == userID {
+			isMember = true
+			break
+		}
+	}
+
+	// If the user is a member, retrieve posts
+	if isMember {
+		group.Posts = []PostResponse{}
+		var posts []PostResponse
+		err = db.Select(&posts, `
+            SELECT id, title, created_at 
+            FROM group_posts 
+            WHERE group_id = ?
+            ORDER BY created_at DESC`, groupID)
+		if err != nil {
+			log.Printf("selecting posts: %v", err)
+			return nil
+		}
+		group.Posts = posts
+	} else {
+		group.Posts = nil // User is not a member, so no posts are returned
+	}
+
 	return &group
 }

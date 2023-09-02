@@ -21,7 +21,7 @@ type PostRequest struct {
 }
 
 type PostResponse struct {
-	PostID  int `json:"post_id,omitempty" db:"post_id"`
+	PostID  int `json:"post_id,omitempty" db:"id"`
 	UserID  int `json:"user_id,omitempty" db:"user_id"`
 	Privacy int `json:"privacy,omitempty" db:"privacy"`
 
@@ -43,7 +43,7 @@ func GetPost(userid int, postID int, db *sqlx.DB) (*PostResponse, error) {
 
 	query := `
     SELECT
-        p.id as post_id,
+        p.id,
         p.user_id,
         p.title,
         p.content,
@@ -107,7 +107,7 @@ func GetSingleGroupPost(db *sqlx.DB, userid, postID int) (*PostResponse, error) 
 		log.Printf("Error retrieving user profile: %v", err)
 	}
 
-	group := GetGroup(db, post.GroupID)
+	group := GetGroup(db, post.GroupID, userid)
 	if err != nil {
 		log.Printf("Error retrieving groups: %v", err)
 	}
@@ -157,7 +157,7 @@ func GetRegularPosts(db *sqlx.DB, userid int) ([]PostResponse, error) {
 	var posts []PostResponse
 	query := `
         SELECT
-            p.id AS post_id,
+            p.id,
             p.user_id AS user_id,
             p.title,
             p.content,
@@ -198,7 +198,7 @@ func GetGroupPosts(db *sqlx.DB, userid int) ([]PostResponse, error) {
 	var posts []PostResponse
 	query := `
         SELECT
-            gp.id AS post_id,
+            gp.id,
             gp.user_id AS user_id,
             gp.group_id,
             gp.title,
@@ -225,7 +225,7 @@ func GetGroupPosts(db *sqlx.DB, userid int) ([]PostResponse, error) {
 		if err != nil {
 			log.Printf("Error retrieving user profile: %v", err)
 		}
-		group := GetGroup(db, posts[i].GroupID)
+		group := GetGroup(db, posts[i].GroupID, userid)
 		if err != nil {
 			log.Printf("Error retrieving groups: %v", err)
 		}

@@ -12,6 +12,7 @@
 	import ViewProfile from './ViewProfile.svelte'
 	import NewPost from './NewPost.svelte'
 	import Groups from './Groups.svelte'
+	import ViewGroup from './ViewGroup.svelte'
 
 	// Icons
 	import FaRegWindowClose from 'svelte-icons/fa/FaRegWindowClose.svelte'
@@ -21,6 +22,7 @@
 	// Stores
 	import { postsStore, groupPostsStore } from '../stores/post'
 	import { currentUser } from '../stores/user'
+	import { groupStore, getGroups, groupInfo } from '../stores/groups'
 
 	// ADS
 	const ads = new URL('../assets/ads.png', import.meta.url).href
@@ -39,6 +41,17 @@
 
 	let route = 'posts'
 
+	async function groups() {
+		const groups = await getGroups()
+		groupStore.set(groups)
+		route = 'groups'
+	}
+
+	let groupid
+	let group
+	async function getGroup(event) {}
+
+	// taskbar
 	function onMouseDown() {
 		dispatch('last', 'ie')
 		moving = true
@@ -60,15 +73,8 @@
 		dispatch('close')
 		THISComponent.$destroy()
 	}
-	let ie
-	function scroll() {
-		if (ie) {
-			setTimeout(() => {
-				ie.scrollTop = ie.scrollHeight
-			}, 500)
-		}
-	}
 
+	let ie
 	let profile
 	let id
 	async function onClick(event) {
@@ -83,7 +89,9 @@
 				route = 'user/' + id
 				break
 			case 'group':
-				console.log(id)
+				groupid = parseInt(event.detail)
+				group = await groupInfo(groupid)
+				route = 'groups/' + groupid
 				break
 		}
 	}
@@ -137,7 +145,7 @@
 		<nav class="flex items-center justify-center gap-4 font-bold text-4xl border-b-4 border-slate-900">
 			<button on:click={() => (route = 'posts')}>[POSTS]</button>
 			<button on:click={() => (route = 'group_posts')}>[GROUP POSTS]</button>
-			<button on:click={() => (route = 'groups')}>[GROUPS]</button>
+			<button on:click={() => groups()}>[GROUPS]</button>
 			<button on:click={() => (route = 'profile')}>[PROFILE]</button>
 		</nav>
 		{#if route == 'posts' || route == 'group_posts'}
@@ -154,13 +162,15 @@
 				<Post post={gPost} on:group={onClick} on:user={onClick} />
 			{/each}
 		{:else if route == 'profile'}
-			<Profile on:user={onClick} on:scroll={scroll} />
+			<Profile on:user={onClick} />
 		{:else if route == 'user/' + id}
 			<ViewProfile {profile} on:user={onClick} />
 		{:else if route == 'post/new'}
 			<NewPost on:regular_post={() => (route = 'posts')} on:group_post={() => (route = 'group_posts')} />
 		{:else if route == 'groups'}
-			<Groups />
+			<Groups on:group={onClick} />
+		{:else if route == 'groups/' + groupid}
+			<ViewGroup {group} on:user={onClick} />
 		{/if}
 		<div class="flex justify-center flex-col items-center">
 			<div class="mt-10">ADVERTISEMENT/SPONSORED CONTENT:</div>

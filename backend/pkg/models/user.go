@@ -145,7 +145,7 @@ func GetAuthenticatedUserDate(db *sqlx.DB, id int) (*UserResponse, error) {
 		notifications[i].Sender = sender
 
 		if notifications[i].GroupID > 0 {
-			group := GetGroup(db, notifications[i].GroupID)
+			group := GetGroup(db, notifications[i].GroupID, id)
 			notifications[i].Group = group
 		}
 
