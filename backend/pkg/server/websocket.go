@@ -119,11 +119,15 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		models.MarkNotificationAsRead(s.db.DB, notif.ID)
 		switch notif.Type {
 		case "follow_accept":
+
 			break
 		case "follow_request":
 			models.AcceptFollowRequest(s.db.DB, id, notif.SenderID)
+			break
 		case "group_join_request":
+			fmt.Println("here: ", notif.SenderID)
 			models.AcceptGroupJoinRequest(s.db.DB, id, notif.SenderID, notif.GroupID)
+			break
 		}
 		break
 	case "reject":

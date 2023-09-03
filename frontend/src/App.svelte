@@ -11,6 +11,7 @@
 	import MSN from './lib/MSN.svelte'
 	import Login from './lib/Login.svelte'
 	import Milf from './lib/Milf.svelte'
+	import Notification from './lib/Notification.svelte'
 
 	const msnUrl = new URL('./assets/msn.png', import.meta.url).href
 	const ieUrl = new URL('./assets/ie.png', import.meta.url).href
@@ -56,6 +57,8 @@
 	$: authenticated = $isAuthenticated
 	$: if (pizdec) bsod()
 </script>
+
+<Notification />
 
 <main style={pizdec ? 'transform: rotate(180deg)' : ''}>
 	{#if authenticated && !loading}

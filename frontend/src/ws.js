@@ -1,5 +1,11 @@
 import { writable } from 'svelte/store'
-import { currentUser, currentUserGroups, currentUserFollowers, currentUserFollowing } from './stores/user'
+import {
+	currentUser,
+	currentUserGroups,
+	notificationsStore,
+	currentUserFollowers,
+	currentUserFollowing,
+} from './stores/user'
 import { postsStore, groupPostsStore } from './stores/post'
 
 export let socket
@@ -18,6 +24,7 @@ export function createWebSocket() {
 			currentUserGroups.update(($currentUserGroups) => ($currentUserGroups = newData.groups))
 			currentUserFollowers.update(($currentUserFollowers) => ($currentUserFollowers = newData.followers))
 			currentUserFollowing.update(($currentUserFollowing) => ($currentUserFollowing = newData.following))
+			notificationsStore.update(($notificationsStore) => ($notificationsStore = newData.notifications))
 		}
 	}
 

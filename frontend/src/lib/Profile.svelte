@@ -15,8 +15,8 @@
 
 	let user = $currentUser
 	let groups = $currentUserGroups
-	let followers = $currentUserFollowers ? $currentUserFollowers.filter((item) => item.status != 'pending') : []
-	let following = $currentUserFollowing ? $currentUserFollowing.filter((item) => item.status != 'pending') : []
+	$: followers = $currentUserFollowers ? $currentUserFollowers.filter((item) => item.status != 'pending') : []
+	$: following = $currentUserFollowing ? $currentUserFollowing.filter((item) => item.status != 'pending') : []
 
 	// Birthday
 	let birthday = formatDateTime(user.date_of_birth)

@@ -35,7 +35,11 @@ func NewNotification(db *sqlx.DB, userid, senderid int, status string, groupid i
 	if groupid == 0 {
 
 		if status == "accepted" {
-			msg = "is now following you"
+			msg = "accepted your follow request"
+			notif_type = "follow_accept"
+
+		} else if status == "rejected" {
+			msg = "rejected your follow request"
 			notif_type = "follow_accept"
 		} else {
 			msg = "wants to follow you"
