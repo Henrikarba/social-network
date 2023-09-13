@@ -36,7 +36,6 @@
 	let selectedGroup
 	let buttonToolTipError
 	let userGroups = $currentUserGroups.filter((group) => group.status == 'joined')
-	$: console.log($currentUserGroups)
 
 	onMount(() => title.focus())
 

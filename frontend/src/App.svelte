@@ -12,6 +12,7 @@
 	import Login from './lib/Login.svelte'
 	import Milf from './lib/Milf.svelte'
 	import Notification from './lib/Notification.svelte'
+	import Chat from './lib/Chat.svelte'
 
 	const msnUrl = new URL('./assets/msn.png', import.meta.url).href
 	const ieUrl = new URL('./assets/ie.png', import.meta.url).href
@@ -25,6 +26,16 @@
 	function openMSN() {
 		msnOpen = !msnOpen
 	}
+
+	let chatOpen = false
+	let chatType
+	let chatID
+	function openChat(event) {
+		chatType = event.detail.type
+		chatID = event.detail.id
+		if (!chatOpen) chatOpen = true
+	}
+
 	let last
 	let zMax
 
@@ -60,6 +71,10 @@
 
 <Notification />
 
+{#if chatOpen}
+	<Chat type={chatType} id={chatID} z={last == 'chat' ? 'z-top' : 'z-low'} on:last={zindex} />
+{/if}
+
 <main style={pizdec ? 'transform: rotate(180deg)' : ''}>
 	{#if authenticated && !loading}
 		<Milf on:rotate={() => (pizdec = true)} />
@@ -83,7 +98,7 @@
 		{/if}
 		{#if msnOpen}
 			<div>
-				<MSN {msnUrl} on:close={openMSN} on:last={zindex} z={last == 'msn' ? 'z-top' : 'z-low'} />
+				<MSN {msnUrl} on:close={openMSN} on:last={zindex} on:chat={openChat} z={last == 'msn' ? 'z-top' : 'z-low'} />
 			</div>
 		{/if}
 	{/if}
@@ -111,6 +126,7 @@
 	:global(.z-top) {
 		z-index: 333;
 	}
+
 	:global(.z-low) {
 		z-index: 125;
 	}

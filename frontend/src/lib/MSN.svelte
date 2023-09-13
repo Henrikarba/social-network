@@ -2,11 +2,19 @@
 	// Svelte
 	import { scale } from 'svelte/transition'
 	import { get_current_component } from 'svelte/internal'
+	const THISComponent = get_current_component()
+
 	import { createEventDispatcher } from 'svelte'
+	const dispatch = createEventDispatcher()
+
 	// Icons
 	import FaRegWindowClose from 'svelte-icons/fa/FaRegWindowClose.svelte'
+	import IoIosPeople from 'svelte-icons/io/IoIosPeople.svelte'
 
-	const THISComponent = get_current_component()
+	import { currentUserGroups, currentUser } from '../stores/user'
+	$: joinedGroups = $currentUserGroups.filter((group) => group.status == 'joined')
+	$: console.log(joinedGroups)
+
 	export let msnUrl
 	export let z
 
@@ -28,7 +36,6 @@
 		}
 	}
 
-	const dispatch = createEventDispatcher()
 	function destroySelf() {
 		dispatch('close')
 		THISComponent.$destroy()
@@ -67,8 +74,37 @@
 			</div>
 		</div>
 	</div>
-	<div class="bg-slate-100 h-[96%] border-b-4 border-neutral-600">
-		<h2>asd</h2>
+	<div class="bg-slate-100 h-[96%] border-b-4 border-neutral-600 flex flex-col px-2">
+		<div class="h-32 border-b-2 p-4">
+			<div class="flex flex-col items-center font-bold justify-center text-xl">
+				<img
+					src="http://localhost:80/images/{$currentUser.avatar}"
+					class="w-20 h-20"
+					alt="{$currentUser.first_name} {$currentUser.last_name}"
+				/>
+				<h2 class="text-center">{$currentUser.first_name} {$currentUser.last_name}</h2>
+			</div>
+		</div>
+		<div>Regular chats</div>
+
+		<div class="flex flex-col">
+			<h2 class="font-bold text-xl flex flex-col">Group chats</h2>
+			{#if joinedGroups && joinedGroups.length > 0}
+				{#each joinedGroups as group}
+					<div
+						class="flex items-center cursor-pointer"
+						on:click={() => dispatch('chat', { type: 'group', id: group.id })}
+					>
+						<div class="w-8 text-primary">
+							<IoIosPeople />
+						</div>
+						<h2 class="ml-1 font-bold hover:text-orange-500">{group.title}</h2>
+					</div>
+				{/each}
+			{:else}
+				<h2>You have not joined any groups</h2>
+			{/if}
+		</div>
 	</div>
 </div>
 <svelte:window on:mouseup={onMouseUp} on:mousemove={onMouseMove} />
