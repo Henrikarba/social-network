@@ -17,6 +17,7 @@
 
 	export let msnUrl
 	export let z
+	$: console.log(z)
 
 	let full = false
 
@@ -52,9 +53,8 @@
 	class="{full
 		? 'w-full h-screen'
 		: 'w-[400px] h-[900px]'} {z} border-2 rounded absolute border-b-4 border-zinc-500 select-none"
-	style={full ? 'left: 0px; top: 0px;' : 'left: ' + left + 'px; top: ' + top + 'px;'}
+	style={full ? 'left: 0px; top: 0px;' : 'left: ' + left + 'px; top: ' + top + 'px; z-index: ' + z + ';'}
 	in:scale|global={{ duration: 500, start: 0.5 }}
-	on:click={() => dispatch('last', 'msn')}
 >
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div
@@ -93,7 +93,7 @@
 				{#each joinedGroups as group}
 					<div
 						class="flex items-center cursor-pointer"
-						on:click={() => dispatch('chat', { type: 'group', id: group.id })}
+						on:click|stopPropagation={() => dispatch('chat', { type: 'group', id: group.id })}
 					>
 						<div class="w-8 text-primary">
 							<IoIosPeople />

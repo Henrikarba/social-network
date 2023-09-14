@@ -33,16 +33,27 @@
 	function openChat(event) {
 		chatType = event.detail.type
 		chatID = event.detail.id
+
 		if (!chatOpen) chatOpen = true
+		focusElement(2)
 	}
 
-	let last
-	let zMax
+	$: elements = [
+		{ name: 'msn', z: 50 },
+		{ name: 'ie', z: 50 },
+		{ name: 'chat', z: 50 },
+	]
 
-	$: last = zMax
-	function zindex(event) {
-		zMax = event.detail
+	function focusElement(index) {
+		elements[index].z = elements.reduce((maxZ, el) => Math.max(maxZ, el.z), 0) + 1
+
+		elements.forEach((el, i) => {
+			if (i !== index) {
+				el.z = Math.max(0, el.z - 1)
+			}
+		})
 	}
+
 	let loading = true
 	let authenticated = false
 
@@ -72,7 +83,9 @@
 <Notification />
 
 {#if chatOpen}
-	<Chat type={chatType} id={chatID} z={last == 'chat' ? 'z-top' : 'z-low'} on:last={zindex} />
+	<div on:click={() => focusElement(2)}>
+		<Chat type={chatType} id={chatID} z={elements[2].z} on:last={() => focusElement(2)} />
+	</div>
 {/if}
 
 <main style={pizdec ? 'transform: rotate(180deg)' : ''}>
@@ -80,25 +93,25 @@
 		<Milf on:rotate={() => (pizdec = true)} />
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<div on:click={() => (last = 'msn')}>
+		<div on:click={() => focusElement(0)}>
 			<Shortcut imgurl={msnUrl} left={300} on:open={openMSN}>MSN</Shortcut>
 		</div>
 
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<div on:click={() => (last = 'ie')}>
+		<div on:click={() => focusElement(1)}>
 			<Shortcut imgurl={ieUrl} left={200} on:open={openIE}>Internet Explorer</Shortcut>
 		</div>
 		<Footer on:bsod={bsod} />
 
 		{#if ieOpen}
-			<div>
-				<IE {ieUrl} on:close={openIE} on:last={zindex} z={last == 'ie' ? 'z-top' : 'z-low'} />
+			<div on:click={() => focusElement(1)}>
+				<IE {ieUrl} on:close={openIE} on:last={() => focusElement(1)} z={elements[1].z} />
 			</div>
 		{/if}
 		{#if msnOpen}
-			<div>
-				<MSN {msnUrl} on:close={openMSN} on:last={zindex} on:chat={openChat} z={last == 'msn' ? 'z-top' : 'z-low'} />
+			<div on:click={() => focusElement(0)}>
+				<MSN {msnUrl} on:close={openMSN} on:last={() => focusElement(0)} on:chat={openChat} z={elements[0].z} />
 			</div>
 		{/if}
 	{/if}

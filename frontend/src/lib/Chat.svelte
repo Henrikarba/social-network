@@ -40,7 +40,7 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
 	class="w-[1280px] h-[720px]'} border-2 rounded absolute border-b-4 border-zinc-500 select-none {z}"
-	style={'left: ' + left + 'px; top: ' + top + 'px;'}
+	style="left: {left}px; top: {top}px; z-index: {z};"
 	in:scale|global={{ duration: 500, start: 0.5 }}
 	on:click={() => dispatch('last', 'chat')}
 >

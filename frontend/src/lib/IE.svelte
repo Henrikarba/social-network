@@ -104,10 +104,11 @@
 <div
 	class="{full
 		? 'w-full h-screen'
-		: 'w-[1280px] h-[720px]'} {z} border-2 rounded absolute border-b-4 border-zinc-500 select-none"
-	style={full ? 'left: 0px; top: 0px;' : 'left: ' + left + 'px; top: ' + top + 'px;'}
+		: 'w-[1280px] h-[720px]'} border-2 rounded absolute border-b-4 border-zinc-500 select-none"
+	style={full
+		? 'left: 0px; top: 0px; z-index: ' + z + ';'
+		: 'left: ' + left + 'px; top: ' + top + 'px; z-index: ' + z + ';'}
 	in:scale|global={{ duration: 500, start: 0.5 }}
-	on:click={() => dispatch('last', 'ie')}
 >
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div
