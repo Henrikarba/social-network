@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte'
 	// WS
 	import { isAuthenticated, socket, createWebSocket } from './ws'
+	import { messagesStore } from './stores/chat'
 
 	// Components
 	import Footer from './lib/Footer.svelte'
@@ -33,6 +34,10 @@
 	function openChat(event) {
 		chatType = event.detail.type
 		chatID = event.detail.id
+
+		if ($messagesStore && chatType == 'regular' && $messagesStore.some((item) => item.sender_id == chatID)) {
+			$messagesStore = $messagesStore.filter((item) => item.sender_id != chatID)
+		}
 
 		if (!chatOpen) chatOpen = true
 		focusElement(2)
@@ -83,8 +88,16 @@
 <Notification />
 
 {#if chatOpen}
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div on:click={() => focusElement(2)}>
-		<Chat type={chatType} id={chatID} z={elements[2].z} on:last={() => focusElement(2)} />
+		<Chat
+			type={chatType}
+			id={chatID}
+			z={elements[2].z}
+			on:last={() => focusElement(2)}
+			on:close={() => (chatOpen = !chatOpen)}
+		/>
 	</div>
 {/if}
 
@@ -105,11 +118,15 @@
 		<Footer on:bsod={bsod} />
 
 		{#if ieOpen}
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
+			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<div on:click={() => focusElement(1)}>
 				<IE {ieUrl} on:close={openIE} on:last={() => focusElement(1)} z={elements[1].z} />
 			</div>
 		{/if}
 		{#if msnOpen}
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
+			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<div on:click={() => focusElement(0)}>
 				<MSN {msnUrl} on:close={openMSN} on:last={() => focusElement(0)} on:chat={openChat} z={elements[0].z} />
 			</div>

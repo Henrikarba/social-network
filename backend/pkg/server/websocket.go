@@ -114,7 +114,7 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		if err != nil {
 			log.Printf("making request: %v", err)
 		}
-		fmt.Println("?")
+		break
 	case "accept":
 		models.MarkNotificationAsRead(s.db.DB, notif.ID)
 		switch notif.Type {

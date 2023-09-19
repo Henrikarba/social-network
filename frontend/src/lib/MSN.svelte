@@ -11,13 +11,14 @@
 	import FaRegWindowClose from 'svelte-icons/fa/FaRegWindowClose.svelte'
 	import IoIosPeople from 'svelte-icons/io/IoIosPeople.svelte'
 
-	import { currentUserGroups, currentUser } from '../stores/user'
+	import { currentUserGroups, currentUser, chatStore } from '../stores/user'
+	import { messagesStore } from '../stores/chat'
 	$: joinedGroups = $currentUserGroups.filter((group) => group.status == 'joined')
-	$: console.log(joinedGroups)
+	$: chats = $chatStore
+	$: console.log(chats)
 
 	export let msnUrl
 	export let z
-	$: console.log(z)
 
 	let full = false
 
@@ -28,7 +29,7 @@
 		dispatch('last', 'msn')
 		moving = true
 	}
-
+	$: console.log($messagesStore)
 	function onMouseMove(e) {
 		if (full) return
 		if (moving) {
@@ -85,8 +86,27 @@
 				<h2 class="text-center">{$currentUser.first_name} {$currentUser.last_name}</h2>
 			</div>
 		</div>
-		<div>Regular chats</div>
-
+		<div class="mt-4 pb-2 border-b-2">
+			<h2 class="font-bold text-xl flex flex-col">Regular Chats</h2>
+			{#if chats && chats.length > 0}
+				{#each chats as chat}
+					<div
+						class="flex items-center cursor-pointer"
+						on:click|stopPropagation={() => dispatch('chat', { type: 'regular', id: chat.sender.id })}
+					>
+						<div class="w-8 text-primary">
+							<IoIosPeople />
+						</div>
+						<h2 class="ml-1 font-bold hover:text-orange-500">{chat.sender.first_name} {chat.sender.last_name}</h2>
+						{#if $messagesStore && $messagesStore.length > 0 && $messagesStore.some((item) => item.sender_id == chat.sender.id)}
+							<h2 class="ml-4 text-red-600 font-bold">NEW MESSAGES</h2>
+						{/if}
+					</div>
+				{/each}
+			{:else}
+				<h2>No chat history. Find an user on fakebook and initiate chat.</h2>
+			{/if}
+		</div>
 		<div class="flex flex-col">
 			<h2 class="font-bold text-xl flex flex-col">Group chats</h2>
 			{#if joinedGroups && joinedGroups.length > 0}

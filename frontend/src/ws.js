@@ -5,7 +5,9 @@ import {
 	notificationsStore,
 	currentUserFollowers,
 	currentUserFollowing,
+	chatStore,
 } from './stores/user'
+import { currentChat, messagesStore } from './stores/chat'
 import { postsStore, groupPostsStore } from './stores/post'
 
 export let socket
@@ -25,6 +27,10 @@ export function createWebSocket() {
 			currentUserFollowers.update(($currentUserFollowers) => ($currentUserFollowers = newData.followers))
 			currentUserFollowing.update(($currentUserFollowing) => ($currentUserFollowing = newData.following))
 			notificationsStore.update(($notificationsStore) => ($notificationsStore = newData.notifications))
+			chatStore.update(($chatStore) => ($chatStore = newData.chatlist))
+			messagesStore.update(($messagesStore) => ($messagesStore = newData.messages))
+		} else if (newData.action == 'get_chat') {
+			currentChat.update(($currentChat) => ($currentChat = newData.data))
 		}
 	}
 
