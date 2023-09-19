@@ -62,11 +62,13 @@
 		if ($currentChat.partner.id == id && type == 'regular') {
 			title = `${$currentChat.partner.first_name} ${$currentChat.partner.last_name}`
 		}
-		$currentChat.messages.sort((a, b) => {
-			const dateA = new Date(a.created_at).getTime()
-			const dateB = new Date(b.created_at).getTime()
-			return dateA - dateB
-		})
+		if ($currentChat?.messages) {
+			$currentChat.messages.sort((a, b) => {
+				const dateA = new Date(a.created_at).getTime()
+				const dateB = new Date(b.created_at).getTime()
+				return dateA - dateB
+			})
+		}
 	}
 	$: console.log($currentChat)
 	$: {
@@ -131,7 +133,7 @@
 	<div data-theme="dracula" class="flex w-full">
 		<div class="w-[1260px]">
 			<div class="bg-base-200 h-[700px] overflow-y-scroll overflow-x-hidden px-6 py-4" bind:this={container}>
-				{#if $currentChat}
+				{#if $currentChat && $currentChat?.messages}
 					{#each $currentChat.messages as chat}
 						{#if chat.sender_id == id}
 							<div class="chat chat-start">

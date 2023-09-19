@@ -87,6 +87,7 @@ func Seeder(db *sqlx.DB) error {
 			if err != nil {
 				log.Println(err)
 			}
+
 		}
 		for i := 0; i < 20; i++ {
 			groupMember := CreateGroupMember(i)

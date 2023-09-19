@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"strconv"
 
@@ -228,6 +229,30 @@ func CreateChatRoomForUsers(db *sqlx.DB, id1, id2 int) error {
 
 	cp2 := ChatroomParticipant{ChatroomID: int(chatroomID), UserID: id2}
 	_, err = tx.NamedExec(`INSERT INTO chatroom_participants (chatroom_id, user_id) VALUES (:chatroom_id, :user_id)`, cp2)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CreateChatRoomForGroups(db *sqlx.DB, groupid int) error {
+	tx, err := db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	cr := Chatroom{
+		Name: fmt.Sprintf("g-%d", groupid),
+	}
+	_, err = tx.NamedExec(`INSERT INTO chatrooms (name) VALUES (:name)`, cr)
 	if err != nil {
 		return err
 	}
