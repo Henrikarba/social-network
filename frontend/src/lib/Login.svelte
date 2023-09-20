@@ -74,14 +74,16 @@
           class="input w-full max-w-xs h-8 bg-white focus:outline-none"
         />
       </div>
-      <div class="flex flex-row">
-        <button class="btn mr-3" on:click={login}>LOGIN</button>
-        <button
-          class="btn"
-          on:click={() => {
-            LoginPage.set("register");
-          }}>TO REGISTER</button
-        >
+      <div class="flex flex-col items-center">
+        <div class="flex flex-row">
+          <button class="btn mr-3" on:click={login}>LOGIN</button>
+          <button
+            class="btn"
+            on:click={() => {
+              LoginPage.set("register");
+            }}>TO REGISTER</button
+          >
+        </div>
         {#if logging}
           <h2 class="text-xl text-red-700 font-extrabold">{msg}</h2>
         {/if}
