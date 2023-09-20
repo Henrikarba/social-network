@@ -6,18 +6,18 @@
 
   let email;
   let password;
-  let logging = false;
+  let registering = false;
   let msg = "";
-  async function login() {
-    logging = true;
-    msg = "........logging in....";
+  async function register() {
+    registering = true;
+    msg = "........registering....";
     console.log(email, password);
     const creds = {
       email: email,
       password: password,
     };
     try {
-      const response = await fetch("http://localhost:80/login", {
+      const response = await fetch("http://localhost:80/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,7 +46,7 @@
     <div
       class="h-10 bg-gradient-to-t from-blue-500 to-blue-700 flex justify-center items-center border-2 rounded border-blue-950"
     >
-      <h2 class="text-white font-extrabold">Log on to Windows</h2>
+      <h2 class="text-white font-extrabold">Register to Windows</h2>
     </div>
     <div
       class="h-1/3 bg-gray-500 logo flex justify-center border-b-2 border-stone-700"
@@ -75,14 +75,14 @@
         />
       </div>
       <div class="flex flex-row">
-        <button class="btn mr-3" on:click={login}>LOGIN</button>
+        <button class="btn mr-3" on:click={register}>REGISTER</button>
         <button
           class="btn"
           on:click={() => {
-            LoginPage.set("register");
-          }}>TO REGISTER</button
+            LoginPage.set("login");
+          }}>TO LOGIN</button
         >
-        {#if logging}
+        {#if registering}
           <h2 class="text-xl text-red-700 font-extrabold">{msg}</h2>
         {/if}
       </div>
