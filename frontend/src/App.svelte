@@ -31,10 +31,13 @@
 	let chatOpen = false
 	let chatType
 	let chatID
+	let groupname
 	function openChat(event) {
 		chatType = event.detail.type
 		chatID = event.detail.id
-
+		if (chatType == 'group') {
+			groupname = event.detail.name
+		}
 		if ($messagesStore && chatType == 'regular' && $messagesStore.some((item) => item.sender_id == chatID)) {
 			$messagesStore = $messagesStore.filter((item) => item.sender_id != chatID)
 		}
@@ -92,6 +95,7 @@
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div on:click={() => focusElement(2)}>
 		<Chat
+			{groupname}
 			type={chatType}
 			id={chatID}
 			z={elements[2].z}

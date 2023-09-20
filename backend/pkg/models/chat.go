@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"strconv"
 
@@ -31,6 +30,7 @@ type Message struct {
 	CreatedAt   string `json:"created_at,omitempty" db:"created_at"`
 	UpdatedAt   string `json:"updated_at,omitempty" db:"updated_at"`
 	IsRead      bool   `json:"is_read,omitempty" db:"is_read"`
+	CreatedBy   *User  `json:"created_by,omitempty"`
 	ChatroomID  int    `json:"chatroom_id,omitempty" db:"chatroom_id"`
 }
 
@@ -229,30 +229,6 @@ func CreateChatRoomForUsers(db *sqlx.DB, id1, id2 int) error {
 
 	cp2 := ChatroomParticipant{ChatroomID: int(chatroomID), UserID: id2}
 	_, err = tx.NamedExec(`INSERT INTO chatroom_participants (chatroom_id, user_id) VALUES (:chatroom_id, :user_id)`, cp2)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func CreateChatRoomForGroups(db *sqlx.DB, groupid int) error {
-	tx, err := db.Beginx()
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if err != nil {
-			_ = tx.Rollback()
-			return
-		}
-		err = tx.Commit()
-	}()
-
-	cr := Chatroom{
-		Name: fmt.Sprintf("g-%d", groupid),
-	}
-	_, err = tx.NamedExec(`INSERT INTO chatrooms (name) VALUES (:name)`, cr)
 	if err != nil {
 		return err
 	}

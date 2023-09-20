@@ -183,6 +183,27 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		s.writeMu.Unlock()
 		break
 
+	case "get_group_chat":
+		var req models.Message
+		decoder := json.NewDecoder(bytes.NewReader(msg.Data))
+		err := decoder.Decode(&req)
+		if err != nil {
+			log.Printf("getting group_chat %v: ", err)
+		}
+		chat, _ := models.GetGroupMessageHistory(s.db.DB, req.SenderID)
+		postBytes, _ := json.Marshal(chat)
+
+		chatRaw := json.RawMessage(postBytes)
+		response := WebSocketMessage{
+			Action: "get_group_chat",
+			Data:   chatRaw,
+		}
+
+		s.writeMu.Lock()
+		conn.WriteJSON(response)
+		s.writeMu.Unlock()
+		break
+
 	case "get_groups":
 		groups, _ := models.GetAllGroups(s.db.DB)
 		groupBytes, _ := json.Marshal(groups)

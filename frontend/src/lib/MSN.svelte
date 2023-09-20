@@ -15,7 +15,7 @@
 	import { messagesStore } from '../stores/chat'
 	$: joinedGroups = $currentUserGroups.filter((group) => group.status == 'joined')
 	$: chats = $chatStore
-	$: console.log(chats)
+	$: console.log(joinedGroups)
 
 	export let msnUrl
 	export let z
@@ -113,7 +113,8 @@
 				{#each joinedGroups as group}
 					<div
 						class="flex items-center cursor-pointer"
-						on:click|stopPropagation={() => dispatch('chat', { type: 'group', id: group.id })}
+						on:click|stopPropagation={() =>
+							dispatch('chat', { type: 'group', id: parseInt(group.id), name: group.title })}
 					>
 						<div class="w-8 text-primary">
 							<IoIosPeople />

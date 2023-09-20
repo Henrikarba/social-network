@@ -21,14 +21,28 @@
 	export let type
 	export let id
 	export let z
+	export let groupname
+
+	$: console.log(type)
 	function fetchChat() {
-		const data = {
-			action: 'get_chat',
-			data: {
-				sender_id: parseInt(id),
-			},
+		if (type == 'regular') {
+			const data = {
+				action: 'get_chat',
+				data: {
+					sender_id: parseInt(id),
+				},
+			}
+			socket.send(JSON.stringify(data))
+		} else if (type == 'group') {
+			console.log('H?')
+			const data = {
+				action: 'get_group_chat',
+				data: {
+					sender_id: parseInt(id),
+				},
+			}
+			socket.send(JSON.stringify(data))
 		}
-		socket.send(JSON.stringify(data))
 	}
 
 	let input
@@ -59,8 +73,10 @@
 
 	let title
 	$: if ($currentChat) {
-		if ($currentChat.partner.id == id && type == 'regular') {
+		if (type == 'regular' && $currentChat.partner.id == id) {
 			title = `${$currentChat.partner.first_name} ${$currentChat.partner.last_name}`
+		} else if (type == 'group') {
+			title = groupname
 		}
 		if ($currentChat?.messages) {
 			$currentChat.messages.sort((a, b) => {
@@ -136,19 +152,35 @@
 				{#if $currentChat && $currentChat?.messages}
 					{#each $currentChat.messages as chat}
 						{#if chat.sender_id == id}
-							<div class="chat chat-start">
-								<div class="chat-image avatar">
-									<div class="w-10 rounded-full">
-										<img src="http://localhost:80/images/{$currentChat.partner.avatar}" />
+							{#if type == 'regular'}
+								<div class="chat chat-start">
+									<div class="chat-image avatar">
+										<div class="w-10 rounded-full">
+											<img src="http://localhost:80/images/{$currentChat.partner.avatar}" />
+										</div>
 									</div>
+									<div class="chat-header text-accent font-bold mb-2">
+										{$currentChat.partner.first_name}
+										{$currentChat.partner.last_name}
+										<time class="text-xs opacity-50">{formatTime(chat.created_at)}</time>
+									</div>
+									<div class="chat-bubble bg-info text-base-200 font-semibold">{chat.content}</div>
 								</div>
-								<div class="chat-header text-accent font-bold mb-2">
-									{$currentChat.partner.first_name}
-									{$currentChat.partner.last_name}
-									<time class="text-xs opacity-50">{formatTime(chat.created_at)}</time>
+							{:else if type == 'group'}
+								<div class="chat chat-start">
+									<div class="chat-image avatar">
+										<div class="w-10 rounded-full">
+											<img src="http://localhost:80/images/{chat.created_by.avatar}" />
+										</div>
+									</div>
+									<div class="chat-header text-accent font-bold mb-2">
+										{chat.created_by.first_name}
+										{chat.created_by.last_name}
+										<time class="text-xs opacity-50">{formatTime(chat.created_at)}</time>
+									</div>
+									<div class="chat-bubble bg-info text-base-200 font-semibold">{chat.content}</div>
 								</div>
-								<div class="chat-bubble bg-info text-base-200 font-semibold">{chat.content}</div>
-							</div>
+							{/if}
 						{:else}
 							<div class="chat chat-end">
 								<div class="chat-image avatar">

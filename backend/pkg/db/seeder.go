@@ -175,7 +175,7 @@ func Seeder(db *sqlx.DB) error {
 	}
 	ok, _ = tableHasRows(db, "messages")
 	if !ok {
-		chats := CreateChat(20)
+		chats := CreateChat(10)
 		err = models.CreateChatRoomForUsers(db, 1, 2)
 
 		for i := range chats {
@@ -202,11 +202,37 @@ func Seeder(db *sqlx.DB) error {
 		if err != nil {
 			return err
 		}
+
+		// group
+
+		gcr := models.Chatroom{
+			Name: fmt.Sprintf("g-%d", 1),
+		}
+		result, err := tx.NamedExec(`INSERT INTO chatrooms (name) VALUES (:name)`, gcr)
 		if err != nil {
 			return err
 		}
+		cid, _ := result.LastInsertId()
+		createdAt := time.Date(2020, time.January, 20, 5, 5, 5, 0, time.UTC)
+		groupChat := &models.Message{
+			SenderID:    1,
+			RecipientID: 0,
+			Content:     "Hello from Linus",
+			ChatroomID:  int(cid),
+			CreatedAt:   utils.FormatTime(&createdAt),
+		}
+		_, err = tx.NamedExec(`
+		INSERT INTO messages (sender_id, recipient_id, content, chatroom_id, created_at)
+		VALUES (:sender_id, :recipient_id, :content, :chatroom_id, :created_at)
+		`, groupChat)
 
+		cp3 := models.ChatroomParticipant{ChatroomID: 2, UserID: 1}
+		_, err = tx.NamedExec(`INSERT INTO chatroom_participants (chatroom_id, user_id) VALUES (:chatroom_id, :user_id)`, cp3)
+		if err != nil {
+			return err
+		}
 	}
+
 	tx.Commit()
 	return nil
 }
@@ -593,29 +619,29 @@ func CreateChat(count int) []*models.Message {
 
 		messages = append(messages, message)
 	}
-	for i := 0; i < count; i++ {
-		senderID := 1
-		recipientID := 3 // Update recipient ID
-		chatroomID := 2  // Update chatroom ID
+	// for i := 0; i < count; i++ {
+	// 	senderID := 1
+	// 	recipientID := 3
+	// 	chatroomID := 2
 
-		if i%2 == 1 { // Alternate sender and recipient
-			senderID, recipientID = recipientID, senderID
-		}
+	// 	if i%2 == 1 {
+	// 		senderID, recipientID = recipientID, senderID
+	// 	}
 
-		content := fmt.Sprintf("Message %d", i+1)
+	// 	content := fmt.Sprintf("Message %d", i+1)
 
-		createdAt := time.Date(2020, time.January, i+20, i+5, i+5, i+5, i, time.UTC)
+	// 	createdAt := time.Date(2020, time.January, i+20, i+5, i+5, i+5, i, time.UTC)
 
-		message := &models.Message{
-			SenderID:    senderID,
-			RecipientID: recipientID,
-			Content:     content,
-			CreatedAt:   utils.FormatTime(&createdAt),
-			ChatroomID:  chatroomID,
-		}
+	// 	message := &models.Message{
+	// 		SenderID:    senderID,
+	// 		RecipientID: recipientID,
+	// 		Content:     content,
+	// 		CreatedAt:   utils.FormatTime(&createdAt),
+	// 		ChatroomID:  chatroomID,
+	// 	}
 
-		messages = append(messages, message)
-	}
+	// 	messages = append(messages, message)
+	// }
 
 	return messages
 }

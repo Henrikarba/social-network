@@ -29,7 +29,7 @@ export function createWebSocket() {
 			notificationsStore.update(($notificationsStore) => ($notificationsStore = newData.notifications))
 			chatStore.update(($chatStore) => ($chatStore = newData.chatlist))
 			messagesStore.update(($messagesStore) => ($messagesStore = newData.messages))
-		} else if (newData.action == 'get_chat') {
+		} else if (newData.action == 'get_chat' || newData.action == 'get_group_chat') {
 			currentChat.update(($currentChat) => ($currentChat = newData.data))
 		}
 	}
