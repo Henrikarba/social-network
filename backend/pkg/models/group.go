@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -51,7 +52,7 @@ func JoinGroup(db *sqlx.DB, userID, creatorID, groupID int) {
 	}
 
 	// Create a notification for the group join request
-	err = NewNotification(db, userID, creatorID, "group_join_request", groupID)
+	err = NewNotification(db, creatorID, userID, "group_join_request", groupID)
 	if err != nil {
 		log.Printf("can't add group_join_request notification: %v", err)
 	}
@@ -134,4 +135,19 @@ func GetGroup(db *sqlx.DB, groupID int, userID int) *Group {
 	}
 
 	return &group
+}
+
+func GetGroupMembers(db *sqlx.DB, groupid int) []int {
+	var members []int
+
+	err := db.Select(&members, `
+	SELECT user_id FROM group_members WHERE group_id = ? AND status = 'joined'
+	`, groupid)
+	if err != nil {
+		log.Printf("selecting group members: %v", err)
+		return nil
+	}
+	fmt.Println(members)
+
+	return members
 }

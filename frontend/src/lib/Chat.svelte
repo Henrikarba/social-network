@@ -22,8 +22,8 @@
 	export let id
 	export let z
 	export let groupname
+	export let groupid = 0
 
-	$: console.log(type)
 	function fetchChat() {
 		if (type == 'regular') {
 			const data = {
@@ -34,7 +34,6 @@
 			}
 			socket.send(JSON.stringify(data))
 		} else if (type == 'group') {
-			console.log('H?')
 			const data = {
 				action: 'get_group_chat',
 				data: {
@@ -51,29 +50,30 @@
 	$: {
 		disabled = !(msg && msg.length > 0 && msg.trim() != '')
 	}
-
 	function newMessage() {
 		const data = {
 			action: 'new_message',
 			data: {
+				type: type,
 				recipient_id: parseInt(id),
 				created_at: new Date(),
 				content: input.value,
+				createdBy: $currentUser,
 			},
 		}
+
 		socket.send(JSON.stringify(data))
-		$currentChat.messages = [...$currentChat.messages, data.data]
+		$currentChat.messages = $currentChat?.messages ? [...$currentChat.messages, data.data] : [data.data]
 		input.value = ''
 		disabled = true
 	}
-
 	onMount(() => {
 		fetchChat()
 	})
 
 	let title
 	$: if ($currentChat) {
-		if (type == 'regular' && $currentChat.partner.id == id) {
+		if (type == 'regular' && $currentChat?.partner?.id && $currentChat.partner.id == id) {
 			title = `${$currentChat.partner.first_name} ${$currentChat.partner.last_name}`
 		} else if (type == 'group') {
 			title = groupname
@@ -86,17 +86,23 @@
 			})
 		}
 	}
-	$: console.log($currentChat)
-	$: {
-		if ($messagesStore && $messagesStore.some((item) => item.sender_id == id)) {
-			const messageToAdd = $messagesStore.find((item) => item.sender_id == id)
-			if (messageToAdd) {
-				$currentChat.messages = [...$currentChat.messages, messageToAdd]
-			}
-			$messagesStore = $messagesStore.filter((item) => item.sender_id != id)
-		}
-	}
 
+	$: if ($messagesStore && type == 'regular' && $messagesStore.some((item) => item.sender_id == id)) {
+		const messageToAdd = $messagesStore.find((item) => item.sender_id == id)
+		if (messageToAdd) {
+			$currentChat.messages = [...$currentChat.messages, messageToAdd]
+		}
+		$messagesStore = $messagesStore.filter((item) => item.sender_id != id)
+	} else if ($messagesStore && type == 'group') {
+		console.log('?=?')
+		const messageToAdd = $messagesStore.find((item) => item.recipient_id == id)
+
+		if (messageToAdd) {
+			$currentChat.messages = [...$currentChat.messages, messageToAdd]
+		}
+		$messagesStore = $messagesStore.filter((item) => item.recipient_id != id)
+	}
+	$: console.log('HERE:', $messagesStore)
 	// moving window
 	let left = 300
 	let top = 20
@@ -151,36 +157,34 @@
 			<div class="bg-base-200 h-[700px] overflow-y-scroll overflow-x-hidden px-6 py-4" bind:this={container}>
 				{#if $currentChat && $currentChat?.messages}
 					{#each $currentChat.messages as chat}
-						{#if chat.sender_id == id}
-							{#if type == 'regular'}
-								<div class="chat chat-start">
-									<div class="chat-image avatar">
-										<div class="w-10 rounded-full">
-											<img src="http://localhost:80/images/{$currentChat.partner.avatar}" />
-										</div>
+						{#if type == 'regular' && chat.sender_id == id}
+							<div class="chat chat-start">
+								<div class="chat-image avatar">
+									<div class="w-10 rounded-full">
+										<img src="http://localhost:80/images/{$currentChat.partner.avatar}" />
 									</div>
-									<div class="chat-header text-accent font-bold mb-2">
-										{$currentChat.partner.first_name}
-										{$currentChat.partner.last_name}
-										<time class="text-xs opacity-50">{formatTime(chat.created_at)}</time>
-									</div>
-									<div class="chat-bubble bg-info text-base-200 font-semibold">{chat.content}</div>
 								</div>
-							{:else if type == 'group'}
-								<div class="chat chat-start">
-									<div class="chat-image avatar">
-										<div class="w-10 rounded-full">
-											<img src="http://localhost:80/images/{chat.created_by.avatar}" />
-										</div>
-									</div>
-									<div class="chat-header text-accent font-bold mb-2">
-										{chat.created_by.first_name}
-										{chat.created_by.last_name}
-										<time class="text-xs opacity-50">{formatTime(chat.created_at)}</time>
-									</div>
-									<div class="chat-bubble bg-info text-base-200 font-semibold">{chat.content}</div>
+								<div class="chat-header text-accent font-bold mb-2">
+									{$currentChat.partner.first_name}
+									{$currentChat.partner.last_name}
+									<time class="text-xs opacity-50">{formatTime(chat.created_at)}</time>
 								</div>
-							{/if}
+								<div class="chat-bubble bg-info text-base-200 font-semibold">{chat.content}</div>
+							</div>
+						{:else if type == 'group' && chat.created_by?.id && chat.created_by.id != $currentUser.id}
+							<div class="chat chat-start">
+								<div class="chat-image avatar">
+									<div class="w-10 rounded-full">
+										<img src="http://localhost:80/images/{chat.created_by.avatar}" />
+									</div>
+								</div>
+								<div class="chat-header text-accent font-bold mb-2">
+									{chat.created_by.first_name}
+									{chat.created_by.last_name}
+									<time class="text-xs opacity-50">{formatTime(chat.created_at)}</time>
+								</div>
+								<div class="chat-bubble bg-info text-base-200 font-semibold">{chat.content}</div>
+							</div>
 						{:else}
 							<div class="chat chat-end">
 								<div class="chat-image avatar">
@@ -232,6 +236,7 @@
 		</div>
 	</div>
 </div>
+
 <svelte:window on:mouseup={onMouseUp} on:mousemove={onMouseMove} />
 
 <style>

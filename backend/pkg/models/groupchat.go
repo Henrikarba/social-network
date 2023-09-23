@@ -7,8 +7,44 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func InsertGroupMessage(db *sqlx.DB, fromid int, groupid int) {
+func InsertGroupMessage(db *sqlx.DB, fromid int, groupid int, content string) error {
+	chatroomID, err := GetGroupChatRoomID(db, groupid)
+	if err != nil {
+		return err
+	}
 
+	if chatroomID == 0 {
+		id, err := CreateChatRoomForGroups(db, groupid)
+		if err != nil {
+			return err
+		}
+		chatroomID = id
+	}
+
+	tx, err := db.Beginx()
+	if err != nil {
+		// return 0, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	message := Message{
+		SenderID:    fromid,
+		RecipientID: 0,
+		Content:     content,
+		ChatroomID:  chatroomID,
+	}
+
+	_, err = tx.NamedExec(`
+        INSERT INTO messages (sender_id, recipient_id, content, chatroom_id)
+        VALUES (:sender_id, :recipient_id, :content, :chatroom_id)
+    `, message)
+	return nil
 }
 
 func GetGroupMessageHistory(db *sqlx.DB, groupid int) ([]Message, error) {

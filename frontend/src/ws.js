@@ -18,7 +18,7 @@ export function createWebSocket() {
 	const ws = new WebSocket('ws://localhost:80/ws')
 	ws.onmessage = (msg) => {
 		const newData = JSON.parse(msg.data)
-		console.log(newData)
+		console.log('.', newData)
 		if (newData?.user) {
 			postsStore.update(($postsStore) => ($postsStore = newData.feed.posts))
 			groupPostsStore.update(($groupPostsStore) => ($groupPostsStore = newData.feed.group_posts))
@@ -31,6 +31,12 @@ export function createWebSocket() {
 			messagesStore.update(($messagesStore) => ($messagesStore = newData.messages))
 		} else if (newData.action == 'get_chat' || newData.action == 'get_group_chat') {
 			currentChat.update(($currentChat) => ($currentChat = newData.data))
+		} else if (newData.type == 'group') {
+			console.log('Here')
+			messagesStore.update(($messagesStore) => {
+				if (!$messagesStore) $messagesStore = []
+				return [...$messagesStore, newData]
+			})
 		}
 	}
 

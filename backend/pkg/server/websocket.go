@@ -170,6 +170,8 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		}
 
 		chat := models.GetFullChat(s.db.DB, id, req.SenderID)
+		ID, _ := models.GetChatRoomID(s.db.DB, id, req.SenderID)
+		chat.ChatroomID = ID
 		postBytes, _ := json.Marshal(chat)
 
 		chatRaw := json.RawMessage(postBytes)
@@ -191,7 +193,12 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 			log.Printf("getting group_chat %v: ", err)
 		}
 		chat, _ := models.GetGroupMessageHistory(s.db.DB, req.SenderID)
-		postBytes, _ := json.Marshal(chat)
+		ID, _ := models.GetGroupChatRoomID(s.db.DB, req.SenderID)
+		fullchat := models.FullChat{
+			ChatroomID: ID,
+			Messages:   chat,
+		}
+		postBytes, _ := json.Marshal(fullchat)
 
 		chatRaw := json.RawMessage(postBytes)
 		response := WebSocketMessage{
@@ -256,14 +263,37 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		if err != nil {
 			log.Printf("new_message err: %v", err)
 		}
-		resultid, err := models.InsertMessage(s.db.DB, id, req.RecipientID, req.Content)
-		if err != nil {
-			log.Printf("insert message err: %v", err)
+		if req.Type == "regular" {
+			resultid, err := models.InsertMessage(s.db.DB, id, req.RecipientID, req.Content)
+			if err != nil {
+				log.Printf("insert message err: %v", err)
+			}
+			req.SenderID = id
+			req.ID = int(resultid)
+			s.broadcast <- req
+		} else {
+			members := models.GetGroupMembers(s.db.DB, req.RecipientID)
+			err := models.InsertGroupMessage(s.db.DB, id, req.RecipientID, req.Content)
+			if err != nil {
+				log.Printf("inserting group msg: %v", err)
+			}
+			profile, _ := models.GetPrivateProfile(s.db.DB, id)
+			req.CreatedBy = profile
+			req.SenderID = id
+
+			for _, mem := range members {
+				if mem == id {
+					continue
+				}
+				conn, ok := s.conns[mem]
+				if ok {
+					s.writeMu.Lock()
+					conn.WriteJSON(req)
+					s.writeMu.Unlock()
+				}
+			}
 		}
 
-		req.SenderID = id
-		req.ID = int(resultid)
-		s.broadcast <- req
 		break
 
 	}

@@ -13,8 +13,9 @@
 
 	import { currentUserGroups, currentUser, chatStore } from '../stores/user'
 	import { messagesStore } from '../stores/chat'
-	$: joinedGroups = $currentUserGroups.filter((group) => group.status == 'joined')
-	$: chats = $chatStore
+	$: joinedGroups = $currentUserGroups ? $currentUserGroups.filter((group) => group.status == 'joined') : []
+	$: chats = $chatStore ? $chatStore.filter((chat) => chat.sender.id != $currentUser.id) : []
+	$: console.log($chatStore)
 	$: console.log(joinedGroups)
 
 	export let msnUrl

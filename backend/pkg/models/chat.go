@@ -22,6 +22,7 @@ type ChatroomParticipant struct {
 }
 
 type Message struct {
+	Type        string `json:"type,omitempty"`
 	ID          int    `json:"id,omitempty" db:"id"`
 	SenderID    int    `json:"sender_id,omitempty" db:"sender_id"`
 	Sender      *User  `json:"sender,omitempty"`
@@ -41,8 +42,9 @@ type ChatListEntry struct {
 }
 
 type FullChat struct {
-	Messages []Message `json:"messages"`
-	Partner  *User     `json:"partner"`
+	ChatroomID int       `json:"chatroom_id"`
+	Messages   []Message `json:"messages"`
+	Partner    *User     `json:"partner"`
 }
 
 func GetChatList(db *sqlx.DB, userid int) *[]ChatListEntry {
