@@ -7,7 +7,7 @@ import {
 	currentUserFollowing,
 	chatStore,
 } from './stores/user'
-import { currentChat, messagesStore } from './stores/chat'
+import { currentChat, groupMessagesStore, messagesStore } from './stores/chat'
 import { postsStore, groupPostsStore } from './stores/post'
 
 export let socket
@@ -29,10 +29,10 @@ export function createWebSocket() {
 			notificationsStore.update(($notificationsStore) => ($notificationsStore = newData.notifications))
 			chatStore.update(($chatStore) => ($chatStore = newData.chatlist))
 			messagesStore.update(($messagesStore) => ($messagesStore = newData.messages))
+			groupMessagesStore.update(($groupMessagesStore) => ($groupMessagesStore = newData.group_messages))
 		} else if (newData.action == 'get_chat' || newData.action == 'get_group_chat') {
 			currentChat.update(($currentChat) => ($currentChat = newData.data))
 		} else if (newData.type == 'group') {
-			console.log('Here')
 			messagesStore.update(($messagesStore) => {
 				if (!$messagesStore) $messagesStore = []
 				return [...$messagesStore, newData]

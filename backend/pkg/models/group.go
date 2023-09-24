@@ -15,9 +15,10 @@ type Group struct {
 	CreatedAt   string `json:"created_at,omitempty" db:"created_at"`
 	UpdatedAt   string `json:"updated_at,omitempty" db:"updated_at"`
 
-	Status  string         `json:"status"`
-	Members []User         `json:"members,omitempty"`
-	Posts   []PostResponse `json:"posts,omitempty"`
+	Status     string         `json:"status"`
+	ChatroomID int            `json:"chatroom_id"`
+	Members    []User         `json:"members,omitempty"`
+	Posts      []PostResponse `json:"posts,omitempty"`
 }
 
 type GroupMember struct {

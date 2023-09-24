@@ -14,7 +14,7 @@
 	// Svelte
 	import { get_current_component } from 'svelte/internal'
 	const THISComponent = get_current_component()
-	import { afterUpdate, createEventDispatcher, onMount } from 'svelte'
+	import { afterUpdate, createEventDispatcher, onDestroy, onMount } from 'svelte'
 	const dispatch = createEventDispatcher()
 	import { scale } from 'svelte/transition'
 
@@ -22,8 +22,6 @@
 	export let id
 	export let z
 	export let groupname
-	export let groupid = 0
-
 	function fetchChat() {
 		if (type == 'regular') {
 			const data = {
@@ -87,15 +85,14 @@
 		}
 	}
 
-	$: if ($messagesStore && type == 'regular' && $messagesStore.some((item) => item.sender_id == id)) {
+	$: if ($currentChat && $messagesStore && type == 'regular' && $messagesStore.some((item) => item.sender_id == id)) {
 		const messageToAdd = $messagesStore.find((item) => item.sender_id == id)
 		if (messageToAdd) {
 			$currentChat.messages = [...$currentChat.messages, messageToAdd]
 		}
 		$messagesStore = $messagesStore.filter((item) => item.sender_id != id)
-	} else if ($messagesStore && type == 'group') {
-		console.log('?=?')
-		const messageToAdd = $messagesStore.find((item) => item.recipient_id == id)
+	} else if ($currentChat && $currentChat?.messages && $messagesStore && type == 'group') {
+		const messageToAdd = $messagesStore.find((item) => item.recipient_id == id && item.type == 'group')
 
 		if (messageToAdd) {
 			$currentChat.messages = [...$currentChat.messages, messageToAdd]
@@ -135,6 +132,8 @@
 		}
 	}
 	afterUpdate(scrollToBottom)
+
+	onDestroy(() => ($currentChat = null))
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->

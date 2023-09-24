@@ -110,6 +110,7 @@ type UserResponse struct {
 	Feed          *Feed            `json:"feed,omitempty"`
 	Groups        *[]Group         `json:"groups,omitempty"`
 	Messages      *[]Message       `json:"messages,omitempty"`
+	GroupMessages *[]Message       `json:"group_messages,omitempty"`
 	Chatlist      *[]ChatListEntry `json:"chatlist,omitempty"`
 }
 
@@ -175,6 +176,9 @@ func GetAuthenticatedUserDate(db *sqlx.DB, id int) (*UserResponse, error) {
 	unread, _ := GetLastUnreadMessages(db, id)
 	profile.Messages = &unread
 
+	unread2, _ := GetLastUnreadGroupMessages(db, id)
+	profile.GroupMessages = &unread2
+
 	chatlist := GetChatList(db, id)
 	profile.Chatlist = chatlist
 
@@ -208,7 +212,6 @@ func GetPrivacySetting(db *sqlx.DB, id int) (int, error) {
 	return user.Privacy, nil
 }
 
-// GetUserGroups retrieves user's groups with status.
 func GetUserGroups(db *sqlx.DB, userID int) ([]Group, error) {
 	var groups []Group
 
@@ -261,8 +264,9 @@ func GetUserGroups(db *sqlx.DB, userID int) ([]Group, error) {
 		return nil, err
 	}
 
-	// Append the status to the corresponding Group structs
 	for i, group := range groups {
+		chatroomID, _ := GetGroupChatRoomID(db, group.ID)
+		groups[i].ChatroomID = chatroomID
 		status, ok := groupStatusMap[group.ID]
 		if ok {
 			groups[i].Status = status

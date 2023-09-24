@@ -12,10 +12,9 @@
 	import IoIosPeople from 'svelte-icons/io/IoIosPeople.svelte'
 
 	import { currentUserGroups, currentUser, chatStore } from '../stores/user'
-	import { messagesStore } from '../stores/chat'
+	import { groupMessagesStore, messagesStore } from '../stores/chat'
 	$: joinedGroups = $currentUserGroups ? $currentUserGroups.filter((group) => group.status == 'joined') : []
 	$: chats = $chatStore ? $chatStore.filter((chat) => chat.sender.id != $currentUser.id) : []
-	$: console.log($chatStore)
 	$: console.log(joinedGroups)
 
 	export let msnUrl
@@ -30,7 +29,7 @@
 		dispatch('last', 'msn')
 		moving = true
 	}
-	$: console.log($messagesStore)
+	$: console.log('WANT THIS:', $groupMessagesStore)
 	function onMouseMove(e) {
 		if (full) return
 		if (moving) {
@@ -54,7 +53,7 @@
 <div
 	class="{full
 		? 'w-full h-screen'
-		: 'w-[400px] h-[900px]'} {z} border-2 rounded absolute border-b-4 border-zinc-500 select-none"
+		: 'w-[600px] h-[900px]'} {z} border-2 rounded absolute border-b-4 border-zinc-500 select-none"
 	style={full ? 'left: 0px; top: 0px;' : 'left: ' + left + 'px; top: ' + top + 'px; z-index: ' + z + ';'}
 	in:scale|global={{ duration: 500, start: 0.5 }}
 >
@@ -115,7 +114,7 @@
 					<div
 						class="flex items-center cursor-pointer"
 						on:click|stopPropagation={() =>
-							dispatch('chat', { type: 'group', id: parseInt(group.id), name: group.title })}
+							dispatch('chat', { type: 'group', id: parseInt(group.id), name: group.title, chatid: group.chatroom_id })}
 					>
 						<div class="w-8 text-primary">
 							<IoIosPeople />

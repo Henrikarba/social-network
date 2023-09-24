@@ -34,6 +34,7 @@
 	let chatType
 	let chatID
 	let groupname
+	let chatroomid
 	function openChat(event) {
 		if (chatOpen) {
 			chatOpen = false

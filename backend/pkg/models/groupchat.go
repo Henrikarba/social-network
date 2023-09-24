@@ -7,6 +7,59 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+func GetLastUnreadGroupMessages(db *sqlx.DB, recipientID int) ([]Message, error) {
+	var groupIDs []int
+
+	groupQuery := `
+        SELECT gm.group_id
+        FROM group_members gm
+        WHERE gm.user_id = ? AND gm.status = 'joined'
+    `
+
+	if err := db.Select(&groupIDs, groupQuery, recipientID); err != nil {
+		return nil, err
+	}
+
+	if len(groupIDs) == 0 {
+		return nil, nil
+	}
+
+	var messages []Message
+
+	for _, groupID := range groupIDs {
+		chatroomID, err := GetGroupChatRoomID(db, groupID)
+		if err != nil {
+			return nil, err
+		}
+
+		messageQuery := `
+			SELECT messages.*
+			FROM messages
+			WHERE recipient_id = 0 AND chatroom_id = ? AND id = (
+				SELECT MAX(id) 
+				FROM messages 
+				WHERE recipient_id = 0 AND chatroom_id = ?
+			)
+		`
+
+		var groupMessages []Message
+		if err := db.Select(&groupMessages, messageQuery, chatroomID, chatroomID); err != nil {
+			return nil, err
+		}
+
+		messages = append(messages, groupMessages...)
+	}
+
+	var user *User
+
+	for i := range messages {
+		user, _ = GetPrivateProfile(db, messages[i].SenderID)
+		messages[i].Sender = user
+	}
+
+	return messages, nil
+}
+
 func InsertGroupMessage(db *sqlx.DB, fromid int, groupid int, content string) error {
 	chatroomID, err := GetGroupChatRoomID(db, groupid)
 	if err != nil {
@@ -44,6 +97,27 @@ func InsertGroupMessage(db *sqlx.DB, fromid int, groupid int, content string) er
         INSERT INTO messages (sender_id, recipient_id, content, chatroom_id)
         VALUES (:sender_id, :recipient_id, :content, :chatroom_id)
     `, message)
+
+	// Check if user is in chatroom_participants table
+	var count int
+	err = tx.Get(&count, `
+        SELECT COUNT(*) FROM chatroom_participants 
+        WHERE chatroom_id = ? AND user_id = ?
+    `, chatroomID, fromid)
+
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		_, err = tx.Exec(`
+            INSERT INTO chatroom_participants (chatroom_id, user_id)
+            VALUES (?, ?)
+        `, chatroomID, fromid)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
