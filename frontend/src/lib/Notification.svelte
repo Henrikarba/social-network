@@ -13,6 +13,8 @@
 			action: 'accept',
 			data: notif,
 		}
+		console.log(notif)
+		// return
 		switch (notif.type) {
 			case 'follow_request':
 				$currentUserFollowers = $currentUserFollowers.map((follower) => {
@@ -61,7 +63,7 @@
 						{/if}
 					</p>
 				</div>
-				{#if notif.type == 'join_request' || notif.type == 'follow_request' || notif.type == 'group_join_request'}
+				{#if notif.type == 'join_request' || notif.type == 'follow_request' || notif.type == 'group_join_request' || notif.type == 'group_join_invite'}
 					<div class="flex justify-around mt-2">
 						<div class="tooltip tooltip-success font-bold uppercase" data-tip="Accept">
 							<!-- svelte-ignore a11y-click-events-have-key-events -->

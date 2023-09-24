@@ -65,7 +65,17 @@ func NewNotification(db *sqlx.DB, userid, senderid int, status string, groupid i
 		} else if status == "group_join_request" {
 			msg = "wants to join your group"
 			notif_type = "group_join_request"
+		} else if status == "group_join_invite" {
+			msg = "invited you to join group"
+			notif_type = "group_join_invite"
+		} else if status == "group_join_invite_accept" {
+			msg = "accepted your invitation to join"
+			notif_type = "group_join_invite_accept"
+		} else if status == "group_join_invite_reject" {
+			msg = "rejected your invitation to join"
+			notif_type = "group_join_invite_reject"
 		}
+
 		query := `INSERT INTO user_notifications (user_id, sender_id, type, message, group_id)
 		VALUES (?, ?, ?, ?, ?)`
 

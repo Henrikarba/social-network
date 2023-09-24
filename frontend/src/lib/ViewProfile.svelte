@@ -4,9 +4,10 @@
 	// Svelte
 	import { createEventDispatcher } from 'svelte'
 	const dispatch = createEventDispatcher()
-	import { currentUserFollowing } from '../stores/user'
+	import { currentUserFollowing, currentUserGroups } from '../stores/user'
 	import { formatDateTime } from '../utils'
 	export let profile
+
 	function makeFollowRequest(id) {
 		if (!$currentUserFollowing) {
 			$currentUserFollowing = []
@@ -50,8 +51,27 @@
 	if (profile?.following) {
 		following = profile.following
 	}
-
-	$: console.log(profile)
+	let inviteableGroups
+	$: joinedGroups = $currentUserGroups ? $currentUserGroups.filter((group) => group.status == 'joined') : []
+	$: if (joinedGroups && joinedGroups.length > 0) {
+		inviteableGroups = joinedGroups.filter((item) => {
+			return !item.member_ids.some((elem) => elem == profile.user.id)
+		})
+	}
+	$: console.log(inviteableGroups)
+	let selectedGroup
+	function inviteToGroup() {
+		const data = {
+			action: 'group_join_invite',
+			data: {
+				user_id: profile.user.id,
+				id: parseInt(selectedGroup),
+			},
+		}
+		inviteableGroups = inviteableGroups.filter((item) => item.id != selectedGroup)
+		socket.send(JSON.stringify(data))
+	}
+	$: console.log(selectedGroup)
 </script>
 
 <div class="flex items-center mt-10 border-4 flex-col p-6">
@@ -102,5 +122,16 @@
 		>
 	{:else if isFollowing == 'pending'}
 		<h2 class="p-6 border-2 rounded border-red-500">Follow request sent, waiting to hear back..</h2>
+	{/if}
+	{#if inviteableGroups && inviteableGroups.length > 0}
+		<div class="mt-10">
+			<h2>Invite user to your group(s)</h2>
+			<select name="group" bind:value={selectedGroup}>
+				{#each inviteableGroups as group}
+					<option value={group.id}>{group.title}</option>
+				{/each}
+			</select>
+			<button class="btn" on:click={inviteToGroup}>Invite user</button>
+		</div>
 	{/if}
 </div>

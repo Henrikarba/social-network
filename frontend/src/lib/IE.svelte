@@ -21,7 +21,7 @@
 
 	// Stores
 	import { postsStore, groupPostsStore } from '../stores/post'
-	import { currentUser } from '../stores/user'
+	import { currentUser, currentUserGroups } from '../stores/user'
 	import { groupStore, getGroups, groupInfo } from '../stores/groups'
 
 	// ADS
@@ -95,8 +95,16 @@
 		}
 	}
 
+	function onPostClick(event) {
+		groupPostFilter = event.detail
+		route = 'group_posts'
+	}
+
+	let groupPostFilter
 	$: posts = $postsStore
-	$: group_posts = $groupPostsStore
+	$: group_posts =
+		groupPostFilter == 0 ? $groupPostsStore : $groupPostsStore.filter((item) => item.group.id == groupPostFilter)
+	$: console.log(group_posts)
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -152,6 +160,17 @@
 			<div class="flex justify-center">
 				<button class="btn btn-ghost mt-4" on:click={() => (route = 'post/new')}>Create New PoSt</button>
 			</div>
+			{#if route == 'group_posts'}
+				<div class="flex flex-col w-80">
+					<h2>Filter by groups</h2>
+					<select name="group" bind:value={groupPostFilter}>
+						<option value="0">All</option>
+						{#each $currentUserGroups as group}
+							<option value={group.id}>{group.title}</option>
+						{/each}
+					</select>
+				</div>
+			{/if}
 		{/if}
 		{#if route == 'posts'}
 			{#each posts as post, index (post.post_id)}
@@ -170,7 +189,7 @@
 		{:else if route == 'groups'}
 			<Groups on:group={onClick} />
 		{:else if route == 'groups/' + groupid}
-			<ViewGroup {group} on:user={onClick} />
+			<ViewGroup {group} on:user={onClick} on:post={onPostClick} />
 		{/if}
 		<div class="flex justify-center flex-col items-center">
 			<div class="mt-10">ADVERTISEMENT/SPONSORED CONTENT:</div>

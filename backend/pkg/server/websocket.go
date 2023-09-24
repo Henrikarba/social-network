@@ -123,7 +123,6 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		models.MarkNotificationAsRead(s.db.DB, notif.ID)
 		switch notif.Type {
 		case "follow_accept":
-
 			break
 		case "follow_request":
 			models.AcceptFollowRequest(s.db.DB, id, notif.SenderID)
@@ -133,8 +132,14 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 			s.broadcast <- *msg
 			break
 		case "group_join_request":
-			fmt.Println("here: ", notif.SenderID)
 			models.AcceptGroupJoinRequest(s.db.DB, id, notif.SenderID, notif.GroupID)
+			msg := &models.Message{
+				RecipientID: notif.SenderID,
+			}
+			s.broadcast <- *msg
+			break
+		case "group_join_invite":
+			models.AcceptGroupJoinInvite(s.db.DB, id, notif.SenderID, notif.GroupID)
 			msg := &models.Message{
 				RecipientID: notif.SenderID,
 			}
@@ -160,7 +165,16 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 			}
 			s.broadcast <- *msg
 			break
+		case "group_join_invite":
+			models.DeclineGroupJoinInvite(s.db.DB, id, notif.SenderID, notif.GroupID)
+			msg := &models.Message{
+				RecipientID: notif.SenderID,
+			}
+			s.broadcast <- *msg
+			break
+
 		}
+
 		break
 	case "toggle_privacy":
 		models.TogglePrivacy(s.db.DB, id)
@@ -283,6 +297,21 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		}
 		s.broadcast <- *msg
 		break
+
+	case "group_join_invite":
+		var req models.GroupMember
+		decoder := json.NewDecoder(bytes.NewReader(msg.Data))
+		err := decoder.Decode(&req)
+		if err != nil {
+			log.Printf("inviting to group %v: ", err)
+		}
+		models.InviteToGroup(s.db.DB, req.GroupID, req.UserID, id)
+		msg := &models.Message{
+			RecipientID: req.UserID,
+		}
+		s.broadcast <- *msg
+		break
+
 	case "new_message":
 		var req models.Message
 		decoder := json.NewDecoder(bytes.NewReader(msg.Data))

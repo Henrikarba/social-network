@@ -11,11 +11,23 @@
 	import FaRegWindowClose from 'svelte-icons/fa/FaRegWindowClose.svelte'
 	import IoIosPeople from 'svelte-icons/io/IoIosPeople.svelte'
 
-	import { currentUserGroups, currentUser, chatStore } from '../stores/user'
+	import { currentUserGroups, currentUser, chatStore, currentUserFollowers, currentUserFollowing } from '../stores/user'
 	import { groupMessagesStore, messagesStore } from '../stores/chat'
 	$: joinedGroups = $currentUserGroups ? $currentUserGroups.filter((group) => group.status == 'joined') : []
 	$: chats = $chatStore ? $chatStore.filter((chat) => chat.sender.id != $currentUser.id) : []
-	$: console.log(joinedGroups)
+	$: if ($currentUserFollowing && $currentUserFollowing.length > 0) {
+		console.log($currentUserFollowing)
+		const addToChat = $currentUserFollowing.filter((item) => {
+			return item.status === 'accepted' && !chats.some((chat) => chat.sender.id == item.id)
+		})
+		chats = [...chats, ...addToChat.map((user) => ({ sender: user, messages: [] }))]
+	}
+	$: if ($currentUserFollowers && $currentUserFollowers.length > 0) {
+		const addToChat = $currentUserFollowers.filter((item) => {
+			return item.status === 'accepted' && !chats.some((chat) => chat.sender.id == item.id)
+		})
+		chats = [...chats, ...addToChat.map((user) => ({ sender: user, messages: [] }))]
+	}
 
 	export let msnUrl
 	export let z
@@ -29,7 +41,6 @@
 		dispatch('last', 'msn')
 		moving = true
 	}
-	$: console.log('WANT THIS:', $groupMessagesStore)
 	function onMouseMove(e) {
 		if (full) return
 		if (moving) {
@@ -104,7 +115,7 @@
 					</div>
 				{/each}
 			{:else}
-				<h2>No chat history. Find an user on fakebook and initiate chat.</h2>
+				<h2>No chat history. You can chat with people you follow or who follow you on fakebook</h2>
 			{/if}
 		</div>
 		<div class="flex flex-col">

@@ -16,7 +16,7 @@ type Follower struct {
 func GetFollowers(db *sqlx.DB, id int) ([]User, error) {
 	var followers []User
 	err := db.Select(&followers, `
-		SELECT u.id, u.first_name, u.last_name, f.status
+		SELECT u.id, u.first_name, u.last_name, u.avatar, f.status
 		FROM users u
 		INNER JOIN followers f ON u.id = f.follower_id
 		WHERE f.followee_id = ?
@@ -31,7 +31,7 @@ func GetFollowers(db *sqlx.DB, id int) ([]User, error) {
 func GetFollowing(db *sqlx.DB, id int) ([]User, error) {
 	var following []User
 	err := db.Select(&following, `
-		SELECT u.id, u.first_name, u.last_name, f.status
+		SELECT u.id, u.first_name, u.last_name, u.avatar, f.status
 		FROM users u
 		INNER JOIN followers f ON u.id = f.followee_id
 		WHERE f.follower_id = ?

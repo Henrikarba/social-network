@@ -7,7 +7,6 @@
 
 	export let group
 
-	console.log(group)
 	let owner = group.members[0]
 	let members = group.members.slice(1)
 
@@ -42,7 +41,22 @@
 			on:click={() => dispatch('user', owner.id)}>{owner.first_name} {owner.last_name}</span
 		>
 	</p>
-	<div class="flex items-center flex-col gap-4 mt-4" data-theme="dracula">
+	<div class="flex gap-4 mt-4" data-theme="dracula">
+		<div class="flex flex-col">
+			{#if memberStatus == 'joined'}
+				<button class="btn" on:click={() => dispatch('post', group.id)}>View our posts</button>
+				{#if group?.members}
+					<h2 class="text-lg font-bold mt-10">Our members:</h2>
+					{#each group.members as member}
+						<h2 class="font-extrabold hover:cursor-pointer" on:click={() => dispatch('user', member.id)}>
+							{member.first_name}
+							{member.last_name}
+						</h2>
+					{/each}
+				{/if}
+			{/if}
+		</div>
+
 		{#if memberStatus != 'joined'}
 			{#if memberStatus == 'pending'}
 				<button disabled class="btn btn-info disabled:text-black">Request sent, awaiting for answer.</button>

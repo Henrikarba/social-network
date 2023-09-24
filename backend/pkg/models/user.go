@@ -265,8 +265,9 @@ func GetUserGroups(db *sqlx.DB, userID int) ([]Group, error) {
 	}
 
 	for i, group := range groups {
-		chatroomID, _ := GetGroupChatRoomID(db, group.ID)
-		groups[i].ChatroomID = chatroomID
+		memberIDS := GetAnyGroupMembers(db, group.ID)
+		groups[i].MemberIDS = memberIDS
+
 		status, ok := groupStatusMap[group.ID]
 		if ok {
 			groups[i].Status = status

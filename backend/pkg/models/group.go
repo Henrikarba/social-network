@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -18,6 +17,7 @@ type Group struct {
 	Status     string         `json:"status"`
 	ChatroomID int            `json:"chatroom_id"`
 	Members    []User         `json:"members,omitempty"`
+	MemberIDS  []int          `json:"member_ids,omitempty"`
 	Posts      []PostResponse `json:"posts,omitempty"`
 }
 
@@ -42,6 +42,55 @@ func GetAllGroups(db *sqlx.DB) ([]Group, error) {
 	return groups, nil
 }
 
+func InviteToGroup(db *sqlx.DB, groupID int, userID int, invitedby int) {
+	_, err := db.Exec(`
+		INSERT INTO group_members (group_id, user_id, status, invited_by)
+		VALUES (?, ?, "invited", ?)`,
+		groupID, userID, invitedby)
+	if err != nil {
+		log.Printf("can't add group_join_invite: %v", err)
+		return
+	}
+
+	// Create a notification for the group join request
+	err = NewNotification(db, userID, invitedby, "group_join_invite", groupID)
+	if err != nil {
+		log.Printf("can't add group_join_request notification: %v", err)
+	}
+}
+
+func AcceptGroupJoinInvite(db *sqlx.DB, userid, senderid, groupid int) {
+
+	_, err := db.Exec(`UPDATE group_members SET status = "joined", updated_at = CURRENT_TIMESTAMP where group_id = ? and user_id = ?`,
+		groupid, userid)
+	if err != nil {
+		log.Printf("can't accept group join request: %v", err)
+		return
+	}
+	err = NewNotification(db, senderid, userid, "group_join_invite_accept", groupid)
+	if err != nil {
+		log.Printf("can't add group_accept notif: %v", err)
+		return
+	}
+	log.Printf("group join invite accepted successfully.")
+}
+
+func DeclineGroupJoinInvite(db *sqlx.DB, userid, senderid, groupid int) {
+
+	_, err := db.Exec(`UPDATE group_members SET status = "rejected", updated_at = CURRENT_TIMESTAMP where group_id = ? and user_id = ?`,
+		groupid, userid)
+	if err != nil {
+		log.Printf("can't reject group join request: %v", err)
+		return
+	}
+	err = NewNotification(db, senderid, userid, "group_join_invite_reject", groupid)
+	if err != nil {
+		log.Printf("can't add group_reject notif: %v", err)
+		return
+	}
+	log.Printf("group join request accepted successfully.")
+}
+
 func JoinGroup(db *sqlx.DB, userID, creatorID, groupID int) {
 	_, err := db.Exec(`
 		INSERT INTO group_members (group_id, user_id, status)
@@ -61,15 +110,17 @@ func JoinGroup(db *sqlx.DB, userID, creatorID, groupID int) {
 }
 
 func AcceptGroupJoinRequest(db *sqlx.DB, userid, senderid, groupid int) {
+
 	_, err := db.Exec(`UPDATE group_members SET status = "joined", updated_at = CURRENT_TIMESTAMP where group_id = ? and user_id = ?`,
 		groupid, senderid)
 	if err != nil {
 		log.Printf("can't accept group join request: %v", err)
 		return
 	}
-	err = NewNotification(db, senderid, userid, "accepted", groupid)
+	err = NewNotification(db, senderid, userid, "group_join_invite_accept", groupid)
 	if err != nil {
 		log.Printf("can't add group_accept notif: %v", err)
+		return
 	}
 	log.Printf("group join request accepted successfully.")
 }
@@ -81,7 +132,7 @@ func RejectGroupJoinRequest(db *sqlx.DB, userid, senderid, groupid int) {
 		log.Printf("can't reject group join request: %v", err)
 		return
 	}
-	err = NewNotification(db, senderid, userid, "rejected", groupid)
+	err = NewNotification(db, senderid, userid, "group_join_invite_reject", groupid)
 	if err != nil {
 		log.Printf("can't add group_accept notif: %v", err)
 	}
@@ -148,7 +199,20 @@ func GetGroupMembers(db *sqlx.DB, groupid int) []int {
 		log.Printf("selecting group members: %v", err)
 		return nil
 	}
-	fmt.Println(members)
+
+	return members
+}
+
+func GetAnyGroupMembers(db *sqlx.DB, groupid int) []int {
+	var members []int
+
+	err := db.Select(&members, `
+	SELECT user_id FROM group_members WHERE group_id = ? AND status = 'joined' OR status = 'requested' OR status = 'invited'
+	`, groupid)
+	if err != nil {
+		log.Printf("selecting group members: %v", err)
+		return nil
+	}
 
 	return members
 }
