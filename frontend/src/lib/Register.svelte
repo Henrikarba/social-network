@@ -4,39 +4,29 @@
   import { LoginPage } from "../stores/signin";
   const xplogo = new URL("../assets/xplogo2.png", import.meta.url).href;
 
-  let email;
-  let password;
-  let first_name;
-  let last_name;
-  let birthdate;
-  let avatar;
-  let nickname;
-  let about;
+  let Email;
+  let Password;
+  let FirstName;
+  let LastName;
+  let DateOfBirth;
+  let Avatar;
+  let Nickname;
+  let AboutMe;
   let registering = false;
   let msg = "";
   let selectedImage = null;
   async function register() {
     registering = true;
     msg = "........registering....";
-    console.log(
-      email,
-      password,
-      first_name,
-      last_name,
-      birthdate,
-      avatar,
-      nickname,
-      about
-    );
     const creds = {
-      email: email,
-      password: password,
-      first_name: first_name,
-      last_name: last_name,
-      birthdate: birthdate,
-      avatar: avatar,
-      nickname: nickname,
-      about: about,
+      Email: Email,
+      Password: Password,
+      FirstName: FirstName,
+      LastName: LastName,
+      DateOfBirth: DateOfBirth,
+      Avatar: Avatar,
+      Nickname: Nickname,
+      AboutMe: AboutMe,
     };
     try {
       const response = await fetch("http://localhost:80/register", {
@@ -85,58 +75,53 @@
       class="h-100 p-5 bg-gray-500 flex flex-col items-center justify-center gap-5 border-b-2 border-gray-500 rounded-b-lg"
     >
       <div class="flex items-center gap-2">
-        <label for="first_name" class="w-24 text-right">First Name</label>
+        <label for="FirstName" class="w-24 text-right">First Name</label>
         <input
-          required
-          bind:value={first_name}
+          bind:value={FirstName}
           type="first_name"
           placeholder="Type here"
           class="input w-full max-w-xs h-8 bg-white focus:outline-none"
         />
-        <label for="last_name" class="w-24 text-right">Last Name</label>
+        <label for="LastName" class="w-24 text-right">Last Name</label>
         <input
-          required
-          bind:value={last_name}
+          bind:value={LastName}
           type="last_name"
           placeholder="Type here"
           class="input w-full max-w-xs h-8 bg-white focus:outline-none"
         />
       </div>
       <div class="flex items-center gap-2">
-        <label for="email" class="w-24 text-right">Email</label>
+        <label for="Email" class="w-24 text-right">Email</label>
         <input
-          required
-          bind:value={email}
+          bind:value={Email}
           type="email"
           placeholder="Type here"
           class="input w-full max-w-xs h-8 bg-white focus:outline-none"
         />
       </div>
       <div class="flex items-center gap-2">
-        <label for="password" class="w-24 text-right">Password</label>
+        <label for="Password" class="w-24 text-right">Password</label>
         <input
-          required
-          bind:value={password}
+          bind:value={Password}
           type="password"
           placeholder="Type here"
           class="input w-full max-w-xs h-8 bg-white focus:outline-none"
         />
       </div>
       <div class="flex items-center gap-2">
-        <label for="birthdate" class="w-24 text-right">Date of Birth</label>
+        <label for="DateOfBirth" class="w-24 text-right">Date of Birth</label>
         <input
-          required
-          bind:value={birthdate}
+          bind:value={DateOfBirth}
           type="date"
           placeholder="Type here"
           class="input w-full max-w-xs h-8 bg-white focus:outline-none"
         />
       </div>
       <div class="flex items-center gap-2">
-        <label for="avatar" class="w-24 text-right">Avatar {"(optional)"}</label
+        <label for="Avatar" class="w-24 text-right">Avatar {"(optional)"}</label
         >
         <input
-          bind:value={avatar}
+          bind:value={Avatar}
           on:change={handleImageChange}
           type="file"
           accept="image/*"
@@ -144,20 +129,21 @@
         />
       </div>
       <div class="flex items-center gap-2">
-        <label for="nickname" class="w-24 text-right"
+        <label for="Nickname" class="w-24 text-right"
           >Nickname {"(optional)"}</label
         >
         <input
-          bind:value={nickname}
+          bind:value={Nickname}
           type="nickname"
           placeholder="Type here"
           class="input w-full max-w-xs h-8 focus:outline-none"
         />
       </div>
       <div class="flex items-center gap-2">
-        <label for="about" class="w-24 text-right">About {"(optional)"}</label>
+        <label for="AboutMe" class="w-24 text-right">About {"(optional)"}</label
+        >
         <input
-          bind:value={about}
+          bind:value={AboutMe}
           type="about"
           placeholder="Type here"
           class="input w-full max-w-xs h-8 bg-white focus:outline-none"

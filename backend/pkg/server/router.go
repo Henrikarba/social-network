@@ -8,6 +8,8 @@ import (
 func (s *Server) router() *http.ServeMux {
 	r := http.NewServeMux()
 
+	// Handle the Register route with CORS middleware
+	r.Handle("/register", mw.Cors(http.HandlerFunc(s.handleRegister)))
 	// Handle the login route with CORS middleware
 	r.Handle("/login", mw.Cors(http.HandlerFunc(s.handleLogin)))
 

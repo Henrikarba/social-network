@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"social-network/pkg/utils"
 
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/crypto/bcrypt"
@@ -87,6 +88,59 @@ func GetUserProfile(db *sqlx.DB, viewerID, profileID int) (*UserResponse, error)
 
 	response.User = &user
 	return &response, nil
+}
+
+func RegisterUser(db *sqlx.DB, Email, Password, FirstName, LastName, DateOfBirth, Nickname, AboutMe, MimeType string, ImageData []byte) error {
+	tx, err := db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	newUser := &User{
+		Email:       Email,
+		Password:    Password,
+		FirstName:   FirstName,
+		LastName:    LastName,
+		DateOfBirth: DateOfBirth,
+		Nickname:    Nickname,
+		AboutMe:     AboutMe,
+	}
+
+	if ImageData != nil {
+		path, err := utils.SaveImage(ImageData, MimeType, "post")
+		if err != nil {
+			log.Println(err)
+		}
+		newUser.Avatar = &path
+	} else {
+		defaultPath := "profile/default.png"
+		newUser.Avatar = &defaultPath
+	}
+
+	result, err := tx.NamedExec(`
+		INSERT INTO users (email, password, first_name, last_name, date_of_birth, avatar, nickname, about_me, privacy, created_at, updated_at)
+		VALUES (:email, :password, :first_name, :last_name, :date_of_birth, :avatar, :nickname, :about_me, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+	`, newUser)
+
+	if err != nil {
+		return err
+	}
+
+	UserID, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+	newUser.ID = int(UserID)
+	return nil
 }
 
 func ValidateLogin(db *sqlx.DB, email, password string) (bool, int, error) {
