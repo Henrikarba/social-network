@@ -11,7 +11,6 @@
   async function login() {
     logging = true;
     msg = "........logging in....";
-    console.log(email, password);
     const creds = {
       email: email,
       password: password,

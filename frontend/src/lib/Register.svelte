@@ -38,13 +38,13 @@
         credentials: "include", // Important
       });
       if (!response.ok) {
-        msg = "an error occured when trying to display error";
-        throw new Error("Network response was not ok");
+        const errorMessage = await response.text();
+        msg = errorMessage; // Set the error message to the msg variable
+        throw new Error(`${errorMessage}`);
       }
       createWebSocket();
     } catch (error) {
-      msg = "an error occured when trying to display error";
-      console.error("Error:", error);
+      throw error;
     }
   }
   function handleImageChange(event) {
