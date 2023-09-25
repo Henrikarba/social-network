@@ -60,6 +60,7 @@
 	}
 	$: console.log(inviteableGroups)
 	let selectedGroup
+	$: invites = []
 	function inviteToGroup() {
 		const data = {
 			action: 'group_join_invite',
@@ -68,8 +69,18 @@
 				id: parseInt(selectedGroup),
 			},
 		}
-		inviteableGroups = inviteableGroups.filter((item) => item.id != selectedGroup)
+		$currentUserGroups = $currentUserGroups.map((item) => {
+			if (item.id == selectedGroup) {
+				item.member_ids = [...item.member_ids, profile.user.id]
+			}
+			return item
+		})
 		socket.send(JSON.stringify(data))
+		invites.push(
+			`Invited ${profile.user.first_name} ${profile.user.last_name} to ${
+				inviteableGroups.find((item) => item.id == selectedGroup).title
+			}`
+		)
 	}
 	$: console.log(selectedGroup)
 </script>
@@ -127,11 +138,17 @@
 		<div class="mt-10">
 			<h2>Invite user to your group(s)</h2>
 			<select name="group" bind:value={selectedGroup}>
-				{#each inviteableGroups as group}
+				<option disabled selected value="0">Select</option>
+				{#each inviteableGroups as group, index (group.id)}
 					<option value={group.id}>{group.title}</option>
 				{/each}
 			</select>
-			<button class="btn" on:click={inviteToGroup}>Invite user</button>
+			<button class="btn" on:click={inviteToGroup} disabled={selectedGroup == 0 ? true : false}>Invite user</button>
 		</div>
+	{/if}
+	{#if invites && invites.length > 0}
+		{#each invites as invite}
+			<h2 class="text-primary">{invite}!</h2>
+		{/each}
 	{/if}
 </div>

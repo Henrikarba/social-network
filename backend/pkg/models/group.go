@@ -117,12 +117,12 @@ func AcceptGroupJoinRequest(db *sqlx.DB, userid, senderid, groupid int) {
 		log.Printf("can't accept group join request: %v", err)
 		return
 	}
-	err = NewNotification(db, senderid, userid, "group_join_invite_accept", groupid)
+	err = NewNotification(db, senderid, userid, "accepted", groupid)
 	if err != nil {
 		log.Printf("can't add group_accept notif: %v", err)
 		return
 	}
-	log.Printf("group join request accepted successfully.")
+	log.Printf("group join invited accepted successfully.")
 }
 
 func RejectGroupJoinRequest(db *sqlx.DB, userid, senderid, groupid int) {
@@ -132,11 +132,11 @@ func RejectGroupJoinRequest(db *sqlx.DB, userid, senderid, groupid int) {
 		log.Printf("can't reject group join request: %v", err)
 		return
 	}
-	err = NewNotification(db, senderid, userid, "group_join_invite_reject", groupid)
+	err = NewNotification(db, senderid, userid, "rejected", groupid)
 	if err != nil {
 		log.Printf("can't add group_accept notif: %v", err)
 	}
-	log.Printf("group join request accepted successfully.")
+	log.Printf("group join invite rejected successfully.")
 }
 
 func GetGroup(db *sqlx.DB, groupID int, userID int) *Group {

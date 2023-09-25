@@ -91,7 +91,7 @@ func GetUserProfile(db *sqlx.DB, viewerID, profileID int) (*UserResponse, error)
 
 func ValidateLogin(db *sqlx.DB, email, password string) (bool, int, error) {
 	var user User
-	err := db.Get(&user, "SELECT id, password FROM users WHERE email = ?", email)
+	err := db.Get(&user, "SELECT id, password FROM users WHERE lower(email) = lower(?)", email)
 	if err != nil {
 		return false, 0, err
 	}

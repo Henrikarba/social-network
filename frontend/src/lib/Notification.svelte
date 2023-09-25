@@ -13,8 +13,6 @@
 			action: 'accept',
 			data: notif,
 		}
-		console.log(notif)
-		// return
 		switch (notif.type) {
 			case 'follow_request':
 				$currentUserFollowers = $currentUserFollowers.map((follower) => {
