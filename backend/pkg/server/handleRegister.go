@@ -1,15 +1,18 @@
 package server
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"social-network/pkg/models"
 	"social-network/pkg/utils"
 
+	"github.com/jmoiron/sqlx"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -38,8 +41,12 @@ func (s *Server) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		isValid := isValidEmail(register.Email)
+		exists := emailExists(s.db.DB, register.Email)
 		if !isValid {
 			http.Error(w, "Email not valid", http.StatusBadRequest)
+			return
+		} else if exists {
+			http.Error(w, "Account with this email already exists", http.StatusBadRequest)
 			return
 		}
 	}
@@ -128,4 +135,36 @@ func isValidEmail(email string) bool {
 	re := regexp.MustCompile(emailPattern)
 
 	return re.MatchString(email)
+}
+
+func emailExists(db *sqlx.DB, email string) bool {
+	tx, err := db.Beginx()
+	if err != nil {
+		return false
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+	// Normalize the email address to lowercase to ensure case-insensitive comparison.
+	email = strings.ToLower(email)
+
+	// Prepare the SQL query.
+	query := "SELECT 1 FROM users WHERE email = ? LIMIT 1"
+
+	// Execute the query and check if the email exists.
+	var result int
+	err = db.QueryRow(query, email).Scan(&result)
+
+	if err == sql.ErrNoRows {
+		// The email does not exist in the database.
+		return false
+	} else if err != nil {
+		// An error occurred while executing the query.
+		return false
+	}
+
+	// The email exists in the database.
+	return true
 }
