@@ -14,8 +14,8 @@ type Group struct {
 	CreatedAt   string `json:"created_at,omitempty" db:"created_at"`
 	UpdatedAt   string `json:"updated_at,omitempty" db:"updated_at"`
 
-	Status     string         `json:"status"`
-	ChatroomID int            `json:"chatroom_id"`
+	Status     string         `json:"status,omitempty"`
+	ChatroomID int            `json:"chatroom_id,omitempty"`
 	Members    []User         `json:"members,omitempty"`
 	MemberIDS  []int          `json:"member_ids,omitempty"`
 	Posts      []PostResponse `json:"posts,omitempty"`
@@ -28,6 +28,24 @@ type GroupMember struct {
 	Status    string `db:"status"`
 	InvitedBy int    `json:"invited_by" db:"invited_by"`
 	JoinedAt  string `db:"joined_at"`
+}
+
+func NewGroup(db *sqlx.DB, g Group) (int, error) {
+	stmt, err := db.Prepare(`
+	INSERT INTO groups (creator_id, title, description)
+	VALUES (?, ?, ?)
+`)
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+	res, err := stmt.Exec(g.CreatorID, g.Title, g.Description)
+	if err != nil {
+		return 0, err
+	}
+	id, _ := res.LastInsertId()
+
+	return int(id), nil
 }
 
 func GetAllGroups(db *sqlx.DB) ([]Group, error) {

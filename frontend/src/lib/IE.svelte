@@ -13,6 +13,7 @@
 	import NewPost from './NewPost.svelte'
 	import Groups from './Groups.svelte'
 	import ViewGroup from './ViewGroup.svelte'
+	import NewGroup from './NewGroup.svelte'
 
 	// Icons
 	import FaRegWindowClose from 'svelte-icons/fa/FaRegWindowClose.svelte'
@@ -187,7 +188,12 @@
 		{:else if route == 'post/new'}
 			<NewPost on:regular_post={() => (route = 'posts')} on:group_post={() => (route = 'group_posts')} />
 		{:else if route == 'groups'}
+			<div class="mt-4 flex justify-center w-full">
+				<button on:click={() => (route = 'groups/new')} class="btn btn-primary">Create New Group</button>
+			</div>
 			<Groups on:group={onClick} />
+		{:else if route == 'groups/new'}
+			<NewGroup on:group={onClick} />
 		{:else if route == 'groups/' + groupid}
 			<ViewGroup {group} on:user={onClick} on:post={onPostClick} />
 		{/if}
