@@ -101,7 +101,13 @@
 		route = 'group_posts'
 	}
 
+	function onSinglePost(event) {
+		viewpostID = event.detail
+		route = 'posts/' + event.detail
+	}
+
 	let groupPostFilter
+	let viewpostID
 	$: posts = $postsStore
 	$: group_posts =
 		groupPostFilter == 0 ? $groupPostsStore : $groupPostsStore.filter((item) => item.group.id == groupPostFilter)
@@ -177,6 +183,10 @@
 			{#each posts as post, index (post.post_id)}
 				<Post {post} on:user={onClick} />
 			{/each}
+		{:else if route == 'posts/' + viewpostID}
+			{#each posts.filter((item) => item.post_id == viewpostID) as post, index (post.post_id)}
+				<Post {post} on:user={onClick} />
+			{/each}
 		{:else if route == 'group_posts'}
 			{#each group_posts as gPost, index (gPost.post_id)}
 				<Post post={gPost} on:group={onClick} on:user={onClick} />
@@ -184,7 +194,7 @@
 		{:else if route == 'profile'}
 			<Profile on:user={onClick} />
 		{:else if route == 'user/' + id}
-			<ViewProfile {profile} on:user={onClick} />
+			<ViewProfile {profile} on:user={onClick} on:singlePost={onSinglePost} />
 		{:else if route == 'post/new'}
 			<NewPost on:regular_post={() => (route = 'posts')} on:group_post={() => (route = 'group_posts')} />
 		{:else if route == 'groups'}

@@ -10,8 +10,7 @@ CREATE TABLE user_notifications (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (sender_id) REFERENCES users (id),
-    FOREIGN KEY (group_id) REFERENCES groups (id),
-    UNIQUE (user_id, sender_id, type)
+    FOREIGN KEY (group_id) REFERENCES groups (id)
 );
 
 

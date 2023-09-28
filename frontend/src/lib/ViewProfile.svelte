@@ -5,6 +5,7 @@
 	import { createEventDispatcher } from 'svelte'
 	const dispatch = createEventDispatcher()
 	import { currentUserFollowing, currentUserGroups } from '../stores/user'
+	import { postsStore } from '../stores/post'
 	import { formatDateTime } from '../utils'
 	export let profile
 
@@ -76,13 +77,15 @@
 			return item
 		})
 		socket.send(JSON.stringify(data))
-		invites.push(
+		invites = [
+			...invites,
 			`Invited ${profile.user.first_name} ${profile.user.last_name} to ${
 				inviteableGroups.find((item) => item.id == selectedGroup).title
-			}`
-		)
+			}`,
+		]
 	}
 	$: console.log(selectedGroup)
+	$: userPosts = $postsStore.filter((item) => item.user_id == profile.user.id)
 </script>
 
 <div class="flex items-center mt-10 border-4 flex-col p-6">
@@ -104,6 +107,14 @@
 		<h2>{profile.user.email}</h2>
 		<h2>{profile.user.about_me}</h2>
 		<h2>Born on {formatDateTime(profile.user.date_of_birth)}</h2>
+	{/if}
+	{#if userPosts && userPosts.length > 0}
+		<h2 class="font-bold text-xl">Posts created by me:</h2>
+		{#each userPosts as post}
+			<h2 class="text-primary hover:cursor-pointer" on:click={() => dispatch('singlePost', post.post_id)}>
+				{post.title}
+			</h2>
+		{/each}
 	{/if}
 	{#if followers && followers.length > 0}
 		<h2 class="mt-4 border-t-4">My followers:</h2>
