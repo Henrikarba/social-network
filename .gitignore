@@ -7,7 +7,7 @@ dist
 !/backend/pkg/db/files/images/post/default2.png
 !/backend/pkg/db/files/images/post/default3.png
 !/backend/pkg/db/files/images/post/default4.png
-!/backend/pkg/db/files/images/profile/default1.png
+!/backend/pkg/db/files/images/profile/default.png
 !/backend/pkg/db/files/images/profile/default2.png
 /backend/pkg/db/sqlite.db
 /backend/pkg/db/sqlite.db-journal
