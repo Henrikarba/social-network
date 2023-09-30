@@ -19,7 +19,6 @@ export function createWebSocket() {
 	const ws = new WebSocket('ws://localhost:80/ws')
 	ws.onmessage = (msg) => {
 		const newData = JSON.parse(msg.data)
-		console.log('.', newData)
 		if (newData?.user) {
 			postsStore.update(($postsStore) => ($postsStore = newData.feed.posts))
 			groupPostsStore.update(($groupPostsStore) => ($groupPostsStore = newData.feed.group_posts))
