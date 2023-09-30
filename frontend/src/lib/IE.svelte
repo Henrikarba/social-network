@@ -42,7 +42,7 @@
 	let full = false
 	let moving = false
 
-	let route = 'events/new'
+	let route = 'posts'
 
 	async function groups() {
 		const groups = await getGroups()
