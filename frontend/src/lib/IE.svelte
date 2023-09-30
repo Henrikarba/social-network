@@ -227,7 +227,7 @@
 		{:else if event?.id && route == 'events/' + event.id}
 			<ViewEvent {event} />
 		{:else if route == 'events/new'}
-			<CreateEvent selectedGroup={groupIDforEvent} />
+			<CreateEvent selectedGroup={groupIDforEvent} on:group={onClick} />
 		{/if}
 		<div class="flex justify-center flex-col items-center">
 			<div class="mt-10">ADVERTISEMENT/SPONSORED CONTENT:</div>

@@ -3,6 +3,8 @@
 	import { slide } from 'svelte/transition'
 	import { currentUserGroups } from '../stores/user'
 	import SveltyPicker, { config } from 'svelty-picker'
+	import { createEventDispatcher } from 'svelte'
+	const dispatch = createEventDispatcher()
 	import { socket } from '../ws'
 	config.weekStart = 1
 	config.theme = 'Dark'
@@ -28,6 +30,9 @@
 			},
 		}
 		socket.send(JSON.stringify(data))
+		setTimeout(() => {
+			dispatch('group', selectedGroup)
+		}, 1000)
 	}
 
 	function convertToUTC(localDate) {

@@ -127,7 +127,15 @@
 		<div on:click={() => focusElement(1)}>
 			<Shortcut imgurl={ieUrl} left={200} on:open={openIE}>Internet Explorer</Shortcut>
 		</div>
-		<Footer on:bsod={bsod} />
+		<Footer
+			on:bsod={bsod}
+			{ieOpen}
+			{msnOpen}
+			on:focus={(e) => {
+				if (e.detail == 'Internet Explorer') focusElement(1)
+				if (e.detail == 'Messenger') focusElement(0)
+			}}
+		/>
 
 		{#if ieOpen}
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
