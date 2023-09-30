@@ -14,6 +14,8 @@ type Group struct {
 	CreatedAt   string `json:"created_at,omitempty" db:"created_at"`
 	UpdatedAt   string `json:"updated_at,omitempty" db:"updated_at"`
 
+	Events []Event `json:"events,omitempty"`
+
 	Status     string         `json:"status,omitempty"`
 	ChatroomID int            `json:"chatroom_id,omitempty"`
 	Members    []User         `json:"members,omitempty"`
@@ -176,7 +178,13 @@ func GetGroup(db *sqlx.DB, groupID int, userID int) *Group {
 		return nil
 	}
 	group.Members = members
+	group.Events = []Event{}
 
+	events, err := GetEventsForGroupID(db, groupID)
+	if err != nil {
+		log.Printf("getting events for group: %v", err)
+	}
+	group.Events = events
 	// Check if the requesting user is a member of the group
 	isMember := false
 	for _, member := range members {
@@ -201,9 +209,8 @@ func GetGroup(db *sqlx.DB, groupID int, userID int) *Group {
 		}
 		group.Posts = posts
 	} else {
-		group.Posts = nil // User is not a member, so no posts are returned
+		group.Posts = nil
 	}
-
 	return &group
 }
 

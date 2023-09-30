@@ -161,6 +161,7 @@ type UserResponse struct {
 	Followers     *[]User          `json:"followers,omitempty"`
 	Following     *[]User          `json:"following,omitempty"`
 	Notifications *[]Notification  `json:"notifications,omitempty"`
+	Events        *[]Event         `json:"events"`
 	Feed          *Feed            `json:"feed,omitempty"`
 	Groups        *[]Group         `json:"groups,omitempty"`
 	Messages      *[]Message       `json:"messages,omitempty"`
@@ -235,6 +236,12 @@ func GetAuthenticatedUserDate(db *sqlx.DB, id int) (*UserResponse, error) {
 
 	chatlist := GetChatList(db, id)
 	profile.Chatlist = chatlist
+
+	events, err := GetEventsForUserID(db, id)
+	if err != nil {
+		log.Printf("get events: %v", err)
+	}
+	profile.Events = events
 
 	return &profile, nil
 }

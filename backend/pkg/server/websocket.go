@@ -222,6 +222,17 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		s.writeMu.Unlock()
 		break
 
+	case "new_event":
+		var req models.Event
+		decoder := json.NewDecoder(bytes.NewReader(msg.Data))
+		err := decoder.Decode(&req)
+		if err != nil {
+			log.Printf("creating new event %v: ", err)
+		}
+		req.CreatedBy = id
+		event, err := models.InsertEvent(s.db.DB, req)
+		fmt.Println(event)
+		break
 	case "get_group_chat":
 		var req models.Message
 		decoder := json.NewDecoder(bytes.NewReader(msg.Data))
@@ -246,6 +257,19 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		s.writeMu.Lock()
 		conn.WriteJSON(response)
 		s.writeMu.Unlock()
+		break
+
+	case "event_response":
+		var req models.EventResponse
+		decoder := json.NewDecoder(bytes.NewReader(msg.Data))
+		err := decoder.Decode(&req)
+		if err != nil {
+			log.Printf("getting event_response %v: ", err)
+		}
+		err = models.InsertEventResponse(s.db.DB, req.EventID, req.Response, id)
+		if err != nil {
+			log.Printf("inserting eventresponse: %v", err)
+		}
 		break
 
 	case "get_groups":

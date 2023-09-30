@@ -13,6 +13,7 @@
 	import NewPost from './NewPost.svelte'
 	import Groups from './Groups.svelte'
 	import ViewGroup from './ViewGroup.svelte'
+	import ViewEvent from './ViewEvent.svelte'
 	import NewGroup from './NewGroup.svelte'
 
 	// Icons
@@ -31,6 +32,7 @@
 
 	// utils
 	import { getProfile } from '../utils'
+	import CreateEvent from './CreateEvent.svelte'
 
 	export let ieUrl
 	export let z
@@ -40,7 +42,7 @@
 	let full = false
 	let moving = false
 
-	let route = 'posts'
+	let route = 'events/new'
 
 	async function groups() {
 		const groups = await getGroups()
@@ -107,7 +109,9 @@
 	}
 
 	let groupPostFilter
+	let groupIDforEvent
 	let viewpostID
+	let event
 	$: posts = $postsStore
 	$: group_posts =
 		groupPostFilter == 0 ? $groupPostsStore : $groupPostsStore.filter((item) => item.group.id == groupPostFilter)
@@ -157,6 +161,7 @@
 	</div>
 	<div class="{'full ? h-[88%] : h-[635px]'} overflow-y-scroll overflow-x-hidden bg-slate-100 p-6" bind:this={ie}>
 		<img src={fb} class="h-20" alt="fakebook" />
+		<h2>You have seen the rest. We just opened.</h2>
 		<nav class="flex items-center justify-center gap-4 font-bold text-4xl border-b-4 border-slate-900">
 			<button on:click={() => (route = 'posts')}>[POSTS]</button>
 			<button on:click={() => (route = 'group_posts')}>[GROUP POSTS]</button>
@@ -205,7 +210,24 @@
 		{:else if route == 'groups/new'}
 			<NewGroup on:group={onClick} />
 		{:else if route == 'groups/' + groupid}
-			<ViewGroup {group} on:user={onClick} on:post={onPostClick} />
+			<ViewGroup
+				{group}
+				on:create_event={(e) => {
+					groupIDforEvent = e.detail
+					route = 'events/new'
+				}}
+				on:user={onClick}
+				on:post={onPostClick}
+				on:event={(e) => {
+					event = e.detail
+
+					route = 'events/' + e.detail.id
+				}}
+			/>
+		{:else if event?.id && route == 'events/' + event.id}
+			<ViewEvent {event} />
+		{:else if route == 'events/new'}
+			<CreateEvent selectedGroup={groupIDforEvent} />
 		{/if}
 		<div class="flex justify-center flex-col items-center">
 			<div class="mt-10">ADVERTISEMENT/SPONSORED CONTENT:</div>

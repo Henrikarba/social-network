@@ -6,6 +6,7 @@ import {
 	currentUserFollowers,
 	currentUserFollowing,
 	chatStore,
+	eventStore,
 } from './stores/user'
 import { currentChat, groupMessagesStore, messagesStore } from './stores/chat'
 import { postsStore, groupPostsStore } from './stores/post'
@@ -30,6 +31,7 @@ export function createWebSocket() {
 			chatStore.update(($chatStore) => ($chatStore = newData.chatlist))
 			messagesStore.update(($messagesStore) => ($messagesStore = newData.messages))
 			groupMessagesStore.update(($groupMessagesStore) => ($groupMessagesStore = newData.group_messages))
+			eventStore.update(($eventStore) => ($eventStore = newData.events))
 		} else if (newData.action == 'get_chat' || newData.action == 'get_group_chat') {
 			currentChat.update(($currentChat) => ($currentChat = newData.data))
 		} else if (newData.type == 'group') {

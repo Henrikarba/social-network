@@ -22,3 +22,4 @@ CREATE TABLE event_responses (
 );
 
 
+CREATE UNIQUE INDEX unique_event_user ON event_responses (event_id, user_id);
