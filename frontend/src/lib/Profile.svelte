@@ -57,7 +57,7 @@
 		<div class="mt-2 border-2 border-zinc-400 p-4">
 			{#if groups.length > 0}
 				<h2 class="border-b-2">My groups</h2>
-				{#each groups as group, index (group.id)}
+				{#each groups.filter((item) => item.status == 'joined') as group, index (group.id)}
 					<h2>{group.title}</h2>
 				{/each}
 			{:else}
@@ -92,7 +92,7 @@
 		</div>
 	</div>
 	<div class="mt-6 flex flex-col justify-center items-center">
-		<h2>USE VPN?!</h2>
+		<h2>USE VPN?! Toggle privacy mode</h2>
 		<div class="flex items-center">
 			<input
 				on:click={() => {

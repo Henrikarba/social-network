@@ -177,7 +177,7 @@
 					<h2>Filter by groups</h2>
 					<select name="group" bind:value={groupPostFilter}>
 						<option value="0">All</option>
-						{#each $currentUserGroups as group}
+						{#each $currentUserGroups.filter((item) => item.status == 'joined') as group}
 							<option value={group.id}>{group.title}</option>
 						{/each}
 					</select>
