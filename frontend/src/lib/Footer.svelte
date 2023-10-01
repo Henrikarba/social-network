@@ -1,6 +1,7 @@
 <script>
 	import { createEventDispatcher } from 'svelte'
 	import { onMount } from 'svelte'
+	import { socket } from '../ws'
 	import FaWindows from 'svelte-icons/fa/FaWindows.svelte'
 	import FaAngleUp from 'svelte-icons/fa/FaAngleUp.svelte'
 	import FaAngleDown from 'svelte-icons/fa/FaAngleDown.svelte'
@@ -23,6 +24,15 @@
 	})
 
 	let bsod = false
+
+	async function logout() {
+		const response = await fetch(`http://localhost:80/logout`, {
+			method: 'POST',
+			credentials: 'include',
+		})
+
+		socket.close()
+	}
 
 	export let ieOpen
 	let msnObj = {
@@ -89,6 +99,7 @@
 			</div>
 
 			<div class="flex justify-center items-center mr-6 text-gray-200">
+				<button class="btn btn-sm btn-error" on:click={logout}>LOG OUT</button>
 				<button
 					on:click={() => {
 						isContentVisible = !isContentVisible

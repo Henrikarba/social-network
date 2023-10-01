@@ -18,6 +18,7 @@ func (s *Server) router() *http.ServeMux {
 	r.Handle("/new/post", mw.Cors(authMiddleware(http.HandlerFunc(s.newPostHandler))))
 	r.Handle("/new/comment", mw.Cors(authMiddleware(http.HandlerFunc(s.newComment))))
 	r.Handle("/new/group", mw.Cors(authMiddleware(http.HandlerFunc(s.newGroup))))
+	r.Handle("/logout", mw.Cors(authMiddleware(http.HandlerFunc(s.logOut))))
 
 	// File server
 	fileHandler := http.StripPrefix("/images/", http.FileServer(http.Dir("./pkg/db/files/images")))

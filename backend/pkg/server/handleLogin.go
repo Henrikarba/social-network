@@ -2,7 +2,9 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"social-network/pkg/models"
 	"social-network/pkg/utils"
@@ -59,4 +61,20 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonResponse)
+}
+
+func (s *Server) logOut(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Logging out")
+	pastTime := time.Now().AddDate(0, 0, -1)
+	deletedCookie := http.Cookie{
+		Name:     "accessToken",
+		Value:    "", // Set value to empty string
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		Expires:  pastTime, // Set expiration time to the past
+	}
+
+	http.SetCookie(w, &deletedCookie)
 }
