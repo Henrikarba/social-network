@@ -85,8 +85,13 @@
 		}
 	}
 
-	$: if ($currentChat && $messagesStore && type == 'regular' && $messagesStore.some((item) => item.sender_id == id)) {
-		const messageToAdd = $messagesStore.find((item) => item.sender_id == id)
+	$: if (
+		$currentChat &&
+		$messagesStore &&
+		type == 'regular' &&
+		$messagesStore.some((item) => item.sender_id == id && type != 'group')
+	) {
+		const messageToAdd = $messagesStore.find((item) => item.sender_id == id && item.type != 'group')
 		if (messageToAdd) {
 			$currentChat.messages = [...$currentChat.messages, messageToAdd]
 		}
