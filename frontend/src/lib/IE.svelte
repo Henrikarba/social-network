@@ -112,9 +112,15 @@
 	let groupIDforEvent
 	let viewpostID
 	let event
-	$: posts = $postsStore
-	$: group_posts =
-		groupPostFilter == 0 ? $groupPostsStore : $groupPostsStore.filter((item) => item.group.id == groupPostFilter)
+	let posts
+	let group_posts
+	$: if ($postsStore && $postsStore.length > 0) {
+		posts = $postsStore
+	}
+	$: if ($groupPostsStore && $groupPostsStore.length > 0) {
+		group_posts =
+			groupPostFilter == 0 ? $groupPostsStore : $groupPostsStore.filter((item) => item.group.id == groupPostFilter)
+	}
 	$: console.log(group_posts)
 </script>
 
@@ -193,9 +199,13 @@
 				<Post {post} on:user={onClick} />
 			{/each}
 		{:else if route == 'group_posts'}
-			{#each group_posts as gPost, index (gPost.post_id)}
-				<Post post={gPost} on:group={onClick} on:user={onClick} />
-			{/each}
+			{#if group_posts && group_posts.length > 0}
+				{#each group_posts as gPost, index (gPost.post_id)}
+					<Post post={gPost} on:group={onClick} on:user={onClick} />
+				{/each}
+			{:else}
+				<h2 class="text-center">Nothing found</h2>
+			{/if}
 		{:else if route == 'profile'}
 			<Profile on:user={onClick} />
 		{:else if route == 'user/' + id}
@@ -225,7 +235,7 @@
 				}}
 			/>
 		{:else if event?.id && route == 'events/' + event.id}
-			<ViewEvent {event} />
+			<ViewEvent {event} on:group={onClick} />
 		{:else if route == 'events/new'}
 			<CreateEvent selectedGroup={groupIDforEvent} on:group={onClick} />
 		{/if}

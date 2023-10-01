@@ -55,7 +55,7 @@
 	</div>
 	<div class="flex gap-2">
 		<div class="mt-2 border-2 border-zinc-400 p-4">
-			{#if groups.length > 0}
+			{#if groups && groups.length > 0}
 				<h2 class="border-b-2">My groups</h2>
 				{#each groups.filter((item) => item.status == 'joined') as group, index (group.id)}
 					<h2>{group.title}</h2>

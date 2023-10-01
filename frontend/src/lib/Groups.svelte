@@ -33,9 +33,9 @@
 						<td class="cursor-pointer font-extrabold" on:click={() => dispatch('group', group.id)}>{group.title}</td>
 						{#if group.creator_id == $currentUser.id}
 							<td class="text-primary uppercase font-extrabold text-lg">Admin</td>
-						{:else if $currentUserGroups.some((userGroup) => userGroup.id === group.id && userGroup.status == 'joined')}
+						{:else if $currentUserGroups && $currentUserGroups.some((userGroup) => userGroup.id === group.id && userGroup.status == 'joined')}
 							<td class="text-cyan-700 uppercase font-extrabold text-lg">Member</td>
-						{:else if $currentUserGroups.some((userGroup) => userGroup.id === group.id && userGroup.status == 'requested')}
+						{:else if $currentUserGroups && $currentUserGroups.some((userGroup) => userGroup.id === group.id && userGroup.status == 'requested')}
 							<td class="text-orange-800 uppercase font-extrabold text-lg">Request pending...</td>
 						{:else}
 							<td>-</td>

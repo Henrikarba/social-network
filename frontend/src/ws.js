@@ -22,17 +22,27 @@ export function createWebSocket() {
 		const newData = JSON.parse(msg.data)
 		console.log(newData)
 		if (newData?.user) {
-			postsStore.update(($postsStore) => ($postsStore = newData.feed.posts))
-			groupPostsStore.update(($groupPostsStore) => ($groupPostsStore = newData.feed.group_posts))
+			postsStore.update(($postsStore) => ($postsStore = newData?.feed.posts ? newData.feed.posts : []))
+			groupPostsStore.update(
+				($groupPostsStore) => ($groupPostsStore = newData.feed?.group_posts ? newData.feed.group_posts : [])
+			)
 			currentUser.update(($currentUser) => ($currentUser = newData.user))
-			currentUserGroups.update(($currentUserGroups) => ($currentUserGroups = newData.groups))
-			currentUserFollowers.update(($currentUserFollowers) => ($currentUserFollowers = newData.followers))
-			currentUserFollowing.update(($currentUserFollowing) => ($currentUserFollowing = newData.following))
-			notificationsStore.update(($notificationsStore) => ($notificationsStore = newData.notifications))
-			chatStore.update(($chatStore) => ($chatStore = newData.chatlist))
-			messagesStore.update(($messagesStore) => ($messagesStore = newData.messages))
-			groupMessagesStore.update(($groupMessagesStore) => ($groupMessagesStore = newData.group_messages))
-			eventStore.update(($eventStore) => ($eventStore = newData.events))
+			currentUserGroups.update(($currentUserGroups) => ($currentUserGroups = newData?.groups ? newData.groups : []))
+			currentUserFollowers.update(
+				($currentUserFollowers) => ($currentUserFollowers = newData?.followers ? newData.followers : [])
+			)
+			currentUserFollowing.update(
+				($currentUserFollowing) => ($currentUserFollowing = newData?.following ? newData.following : [])
+			)
+			notificationsStore.update(
+				($notificationsStore) => ($notificationsStore = newData?.notifications ? newData.notifications : [])
+			)
+			chatStore.update(($chatStore) => ($chatStore = newData?.chatlist ? newData.chatlist : []))
+			messagesStore.update(($messagesStore) => ($messagesStore = newData?.messages ? newData.messages : []))
+			groupMessagesStore.update(
+				($groupMessagesStore) => ($groupMessagesStore = newData?.group_messages ? newData.group_messages : [])
+			)
+			eventStore.update(($eventStore) => ($eventStore = newData?.events ? newData.events : []))
 		} else if (newData.action == 'get_chat' || newData.action == 'get_group_chat') {
 			currentChat.update(($currentChat) => ($currentChat = newData.data))
 		} else if (newData.type == 'group') {
