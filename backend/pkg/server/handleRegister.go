@@ -17,31 +17,44 @@ import (
 )
 
 func (s *Server) handleRegister(w http.ResponseWriter, r *http.Request) {
-	var register models.UserRequest
-	var MimeType string
-	var hashPassword string
 
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&register); err != nil {
-		http.Error(w, "Unable to decode JSON data", http.StatusBadRequest)
+	err := r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		http.Error(w, "Unable to parse form data", http.StatusBadRequest)
 		return
 	}
-	if register.FirstName == "" {
+	var postData models.UserRequest
+	postData.Email = r.FormValue("email")
+	postData.Nickname = r.FormValue("nickname")
+	postData.FirstName = r.FormValue("first_name")
+	postData.LastName = r.FormValue("last_name")
+	postData.Password = r.FormValue("password")
+	postData.DateOfBirth = r.FormValue("date_of_birth")
+	file, header, err := r.FormFile("image")
+	if err == nil {
+		postData.MimeType = header.Header.Get("Content-Type")
+		postData.ImageData, err = io.ReadAll(file)
+		if err != nil {
+			http.Error(w, "Unable to read file data", http.StatusInternalServerError)
+			return
+		}
+	}
+	if postData.FirstName == "" {
 		http.Error(w, "First Name required", http.StatusBadRequest)
 		return
 	}
 
-	if register.LastName == "" {
+	if postData.LastName == "" {
 		http.Error(w, "Last Name required", http.StatusBadRequest)
 		return
 	}
 
-	if register.Email == "" {
+	if postData.Email == "" {
 		http.Error(w, "Email required", http.StatusBadRequest)
 		return
 	} else {
-		isValid := isValidEmail(register.Email)
-		exists := emailExists(s.db.DB, register.Email)
+		isValid := isValidEmail(postData.Email)
+		exists := emailExists(s.db.DB, postData.Email)
 		if !isValid {
 			http.Error(w, "Email not valid", http.StatusBadRequest)
 			return
@@ -51,40 +64,30 @@ func (s *Server) handleRegister(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if register.Password == "" {
+	if postData.Password == "" {
 		http.Error(w, "Password required", http.StatusBadRequest)
 		return
 	}
 
-	if register.DateOfBirth == "" {
+	if postData.DateOfBirth == "" {
 		http.Error(w, "Date Of Birth required", http.StatusBadRequest)
 		return
 	}
 
-	file, header, err := r.FormFile("image")
-	if err == nil {
-		MimeType = header.Header.Get("Content-Type")
-		register.ImageData, err = io.ReadAll(file)
-		if err != nil {
-			http.Error(w, "Unable to read file data", http.StatusInternalServerError)
-			return
-		}
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(register.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(postData.Password), bcrypt.DefaultCost)
 	if err != nil {
 		fmt.Println(err)
 	}
-	hashPassword = string(hashedPassword)
+	hashPassword := string(hashedPassword)
 
-	err = models.RegisterUser(s.db.DB, register.Email, hashPassword, register.FirstName, register.LastName, register.DateOfBirth, register.Nickname, register.AboutMe, MimeType, register.ImageData)
+	err = models.RegisterUser(s.db.DB, postData.Email, hashPassword, postData.FirstName, postData.LastName, postData.DateOfBirth, postData.Nickname, postData.AboutMe, postData.MimeType, postData.ImageData)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	// auto login after register
 
-	valid, id, _ := models.ValidateLogin(s.db.DB, register.Email, register.Password)
+	valid, id, _ := models.ValidateLogin(s.db.DB, postData.Email, postData.Password)
 	if !valid {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -151,7 +154,7 @@ func emailExists(db *sqlx.DB, email string) bool {
 	email = strings.ToLower(email)
 
 	// Prepare the SQL query.
-	query := "SELECT 1 FROM users WHERE email = ? LIMIT 1"
+	query := "SELECT 1 FROM users WHERE email = lower(?) LIMIT 1"
 
 	// Execute the query and check if the email exists.
 	var result int

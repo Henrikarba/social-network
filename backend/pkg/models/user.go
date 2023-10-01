@@ -35,6 +35,7 @@ type UserRequest struct {
 	LastName    string `schema:"last_name"`
 	DateOfBirth string `schema:"date_of_birth"`
 	ImageData   []byte `schema:"image"`
+	MimeType    string `schema:"mimeType"`
 	Nickname    string `schema:"nickname"`
 	AboutMe     string `schema:"about_me"`
 }
@@ -110,9 +111,9 @@ func RegisterUser(db *sqlx.DB, Email, Password, FirstName, LastName, DateOfBirth
 		Nickname:    Nickname,
 		AboutMe:     AboutMe,
 	}
-
+	fmt.Println(ImageData)
 	if ImageData != nil {
-		path, err := utils.SaveImage(ImageData, MimeType, "post")
+		path, err := utils.SaveImage(ImageData, MimeType, "profile")
 		if err != nil {
 			log.Println(err)
 		}
