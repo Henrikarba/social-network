@@ -38,8 +38,13 @@
 <div class="mt-10 flex flex-col items-center">
 	<div class="flex">
 		<h2 class="text-4xl">Welcome back {user.first_name} {user.last_name}!</h2>
+
 		<img class="w-10" src="http://localhost:80/images/{user.avatar}" alt="" />
 	</div>
+	{#if user?.nickname}
+		<h2>A.K.A <span class="text-primary font-bold">{user.nickname}</span></h2>
+	{/if}
+	<h2>Email: <span class="text-primary font-bold">{user.email}</span></h2>
 	<div class="flex items-center">
 		<div class="w-10 mr-4">
 			<FaBirthdayCake />

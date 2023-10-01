@@ -10,8 +10,8 @@
 	let FirstName
 	let LastName
 	let DateOfBirth
-	let Nickname
-	let AboutMe
+	let Nickname = ''
+	let AboutMe = ''
 	let registering = false
 	let msg = ''
 	let files

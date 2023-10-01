@@ -46,7 +46,7 @@ func GetUserProfile(db *sqlx.DB, viewerID, profileID int) (*UserResponse, error)
 	var follower Follower
 
 	query := `
-		SELECT u.id, u.first_name, u.last_name, u.privacy, u.email, u.about_me, u.avatar, u.date_of_birth
+		SELECT u.id, u.first_name, u.last_name, u.privacy, u.email, u.about_me, u.avatar, u.date_of_birth, u.nickname
 		FROM users u
 		WHERE u.id = ? AND (u.privacy = 0 OR u.privacy = 1)
 	`
@@ -111,7 +111,6 @@ func RegisterUser(db *sqlx.DB, Email, Password, FirstName, LastName, DateOfBirth
 		Nickname:    Nickname,
 		AboutMe:     AboutMe,
 	}
-	fmt.Println(ImageData)
 	if ImageData != nil {
 		path, err := utils.SaveImage(ImageData, MimeType, "profile")
 		if err != nil {
@@ -249,16 +248,17 @@ func GetAuthenticatedUserDate(db *sqlx.DB, id int) (*UserResponse, error) {
 
 func GetPublicProfile(db *sqlx.DB, id int) (*User, error) {
 	var user User
-	err := db.Get(&user, "SELECT id, email, first_name, last_name, about_me, date_of_birth, avatar, privacy FROM users WHERE id = ?", id)
+	err := db.Get(&user, "SELECT id, email, first_name, last_name, about_me, date_of_birth, avatar, privacy, nickname FROM users WHERE id = ?", id)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(user.Nickname)
 	return &user, nil
 }
 
 func GetPrivateProfile(db *sqlx.DB, id int) (*User, error) {
 	var user User
-	err := db.Get(&user, "SELECT id, first_name, last_name, avatar FROM users WHERE id = ?", id)
+	err := db.Get(&user, "SELECT id, first_name, last_name, avatar, nickname FROM users WHERE id = ?", id)
 	if err != nil {
 		return nil, err
 	}

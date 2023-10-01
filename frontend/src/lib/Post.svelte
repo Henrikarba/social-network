@@ -86,10 +86,19 @@
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			Posted by
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
-			<span on:click={() => dispatch('user', post.created_by.id)} class="cursor-pointer font-bold text-violet-800"
-				>{post.created_by.first_name}
-				{post.created_by.last_name}</span
-			>
+			{#if post.created_by?.nickname}
+				<div class="tooltip" data-tip="Also known as {post.created_by.nickname}">
+					<span on:click={() => dispatch('user', post.created_by.id)} class="cursor-pointer font-bold text-violet-800"
+						>{post.created_by.first_name}
+						{post.created_by.last_name}</span
+					>
+				</div>
+			{:else}
+				<span on:click={() => dispatch('user', post.created_by.id)} class="cursor-pointer font-bold text-violet-800"
+					>{post.created_by.first_name}
+					{post.created_by.last_name}</span
+				>
+			{/if}
 			on {formatTime(post.created_at)}
 			{#if post.group}
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
