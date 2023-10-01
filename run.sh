@@ -21,6 +21,10 @@ trap cleanup SIGINT
 # Allow non-root users to bind to privileged ports (0-1023)
 sudo sysctl net.ipv4.ip_unprivileged_port_start=80
 
+# Create frontend.log and backend.log if they don't exist
+touch ./frontend/frontend.log
+touch ./backend/backend.log
+
 # Navigate to frontend directory and run npm commands
 cd frontend
 npm install
@@ -33,4 +37,5 @@ go run . &> backend.log &
 backend_pid=$!
 
 # Tail the logs in the foreground to see the outputs
-tail -f frontend.log -f backend.log
+tail -f ../frontend/frontend.log -f ../backend/backend.log
+
