@@ -207,7 +207,7 @@
 				<h2 class="text-center">Nothing found</h2>
 			{/if}
 		{:else if route == 'profile'}
-			<Profile on:user={onClick} />
+			<Profile on:user={onClick} on:singlePost={onSinglePost} />
 		{:else if route == 'user/' + id}
 			<ViewProfile {profile} on:user={onClick} on:singlePost={onSinglePost} />
 		{:else if route == 'post/new'}

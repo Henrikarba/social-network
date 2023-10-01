@@ -249,6 +249,24 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 		req.CreatedBy = id
 		event, err := models.InsertEvent(s.db.DB, req)
 		fmt.Println(event)
+		groupids := models.GetGroupMembers(s.db.DB, event.GroupID)
+		for _, uid := range groupids {
+			if uid == id {
+				continue
+			}
+			err := models.NewEventNotification(s.db.DB, uid, *event)
+			if err != nil {
+				log.Printf("inserting notification: %v", err)
+			}
+
+			conn, ok := s.conns[uid]
+			if ok {
+				data, _ := models.GetAuthenticatedUserDate(s.db.DB, uid)
+				s.writeMu.Lock()
+				conn.WriteJSON(data)
+				s.writeMu.Unlock()
+			}
+		}
 		break
 	case "get_group_chat":
 		var req models.Message

@@ -20,6 +20,20 @@ type Notification struct {
 	Group  *Group `json:"group,omitempty"`
 }
 
+func NewEventNotification(db *sqlx.DB, userid int, e Event) error {
+
+	query := `
+    INSERT INTO user_notifications (user_id, sender_id, group_id, type, message)
+    VALUES (?, ?, ?, ?, ?)`
+
+	_, err := db.Exec(query, userid, e.CreatedBy, e.GroupID, "new_event", fmt.Sprintf(`New event '%s'`, e.Title))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NewNotification(db *sqlx.DB, userid, senderid int, status string, groupid int) error {
 	tx, err := db.Beginx()
 	if err != nil {
