@@ -8,6 +8,21 @@
 	import { postsStore } from '../stores/post'
 	import { formatDateTime } from '../utils'
 	export let profile
+	function unFollow() {
+		$currentUserFollowing =
+			$currentUserFollowing && $currentUserFollowing.length > 0
+				? $currentUserFollowing.filter((item) => item.id != profile.user.id)
+				: []
+		profile.followers = profile?.followers ? followers.filter((item) => item.id != $currentUser.id) : []
+
+		const data = {
+			action: 'follow_cancel',
+			data: {
+				id: parseInt(profile.user.id),
+			},
+		}
+		socket.send(JSON.stringify(data))
+	}
 
 	function makeFollowRequest(id) {
 		if (!$currentUserFollowing) {
@@ -41,15 +56,15 @@
 
 		if (follower) {
 			isFollowing = follower.status === 'accepted' ? 'accepted' : 'pending'
-		}
+		} else isFollowing = ''
 	}
 	$: privateProfile = !profile.user?.email
 	let followers
 	let following
-	if (profile?.followers) {
+	$: if (profile?.followers) {
 		followers = profile.followers
 	}
-	if (profile?.following) {
+	$: if (profile?.following) {
 		following = profile.following
 	}
 	let inviteableGroups
@@ -59,7 +74,6 @@
 			return !item.member_ids.some((elem) => elem == profile.user.id)
 		})
 	}
-	$: console.log(inviteableGroups)
 	let selectedGroup
 	$: invites = []
 	function inviteToGroup() {
@@ -138,7 +152,7 @@
 	{#if following && following.length > 0}
 		<h2 class="mt-4 border-t-4">I follow:</h2>
 		<div class="border-2 border-red-950 p-2 flex gap-2">
-			{#each following as follower, index (follower.id)}
+			{#each following as follower}
 				<h2 class="text-orange-500 font-extrabold cursor-pointer" on:click={() => dispatch('user', follower.id)}>
 					{follower.first_name}
 					{follower.last_name}
@@ -152,6 +166,9 @@
 		>
 	{:else if isFollowing == 'pending'}
 		<h2 class="p-6 border-2 rounded border-red-500">Follow request sent, waiting to hear back..</h2>
+		<button class="btn btn-error mt-2" on:click={unFollow}>Cancel Follow Request</button>
+	{:else}
+		<button class="btn btn-error mt-2" on:click={unFollow}>Stop Following</button>
 	{/if}
 	{#if inviteableGroups && inviteableGroups.length > 0}
 		<div class="mt-10">

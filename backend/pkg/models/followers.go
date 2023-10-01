@@ -42,6 +42,34 @@ func GetFollowing(db *sqlx.DB, id int) ([]User, error) {
 
 	return following, nil
 }
+
+func CancelFollowRequest(db *sqlx.DB, followerID, followeeID int) error {
+	tx, err := db.Beginx()
+	if err != nil {
+		return err
+	}
+
+	// Delete the follow request
+	_, err = tx.Exec(`DELETE FROM followers WHERE follower_id = ? AND followee_id = ?`, followerID, followeeID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.Exec(`DELETE FROM user_notifications WHERE sender_id = ? AND user_id = ? AND (type = 'follow_request' OR type = 'follow_accept')`, followerID, followeeID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return nil
+}
+
 func CreateFollowRequest(db *sqlx.DB, followerID, followeeID int) error {
 	tx, err := db.Beginx()
 	if err != nil {

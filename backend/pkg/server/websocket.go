@@ -179,6 +179,23 @@ func (s *Server) messageHandler(msg WebSocketMessage, id int) {
 	case "toggle_privacy":
 		models.TogglePrivacy(s.db.DB, id)
 		break
+
+	case "follow_cancel":
+		var req models.User
+		decoder := json.NewDecoder(bytes.NewReader(msg.Data))
+		err := decoder.Decode(&req)
+		if err != nil {
+			log.Printf("getting user %v: ", err)
+		}
+		err = models.CancelFollowRequest(s.db.DB, id, req.ID)
+		if err != nil {
+			log.Printf("making request: %v", err)
+		}
+		msg := &models.Message{
+			RecipientID: req.ID,
+		}
+		s.broadcast <- *msg
+		break
 	case "get_user":
 		var req models.UserResponse
 		decoder := json.NewDecoder(bytes.NewReader(msg.Data))
