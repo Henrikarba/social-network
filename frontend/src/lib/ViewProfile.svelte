@@ -105,7 +105,9 @@
 		</div>
 	{:else}
 		<h2>{profile.user.email}</h2>
-		<h2>{profile.user.about_me}</h2>
+		{#if profile.user?.about_me}
+			<h2>{profile.user.about_me}</h2>
+		{/if}
 		<h2>Born on {formatDateTime(profile.user.date_of_birth)}</h2>
 	{/if}
 	{#if userPosts && userPosts.length > 0}

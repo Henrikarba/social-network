@@ -50,8 +50,10 @@
 		<h2>Congratz, your birthday is coming soon. Or later. Depends on when you were born</h2>
 	</div>
 	<div class="mt-2">
-		<h2>About me:</h2>
-		{user.about_me}
+		{#if user?.about_me}
+			<h2>About me:</h2>
+			{user.about_me}
+		{/if}
 	</div>
 	<div class="flex gap-2">
 		<div class="mt-2 border-2 border-zinc-400 p-4">
