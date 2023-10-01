@@ -84,7 +84,6 @@
 			}`,
 		]
 	}
-
 	$: console.log(selectedGroup)
 	$: userPosts = $postsStore.filter((item) => item.user_id == profile.user.id)
 </script>
@@ -94,9 +93,12 @@
 	{#if profile.user?.avatar}
 		<img class="w-16" src="http://localhost:80/images/{profile.user.avatar}" alt="" />
 	{/if}
-	<h2 class="text-4xl font-extrabold">{profile.user.first_name} {profile.user.last_name}</h2>
+	<h2 class="text-4xl font-extrabold">
+		{profile.user.first_name}
+		{profile.user.last_name}
+	</h2>
 	{#if profile.user?.nickname}
-		<h2>A.K.A <span class="text-primary font-bold">{profile.user.nickname}</span></h2>
+		<h2>A.K.A <span class="text-primary">{profile.user.nickname}</span></h2>
 	{/if}
 	{#if isFollowing == '' || (isFollowing == 'pending' && privateProfile)}
 		<div>
@@ -107,7 +109,7 @@
 			<p class="font-mono">no promises though</p>
 		</div>
 	{:else}
-		<h2>Email: {profile.user.email}</h2>
+		<h2>{profile.user.email}</h2>
 		{#if profile.user?.about_me}
 			<h2>{profile.user.about_me}</h2>
 		{/if}

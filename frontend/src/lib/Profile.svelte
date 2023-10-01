@@ -6,6 +6,7 @@
 	//
 	import { formatDateTime } from '../utils.js'
 	import { socket } from '../ws'
+	import { postsStore } from '../stores/post'
 
 	// Icons
 	import FaBirthdayCake from 'svelte-icons/fa/FaBirthdayCake.svelte'
@@ -31,6 +32,7 @@
 		socket.send(JSON.stringify(data))
 	}
 	$: console.log(followers, following)
+	$: userPosts = $postsStore.filter((item) => item.user_id == $currentUser.id)
 </script>
 
 <div class="mt-10 flex flex-col items-center">
@@ -93,6 +95,14 @@
 			{/if}
 		</div>
 	</div>
+	{#if userPosts && userPosts.length > 0}
+		<h2 class="font-bold text-xl">Posts created by me:</h2>
+		{#each userPosts as post}
+			<h2 class="text-primary hover:cursor-pointer" on:click={() => dispatch('singlePost', post.post_id)}>
+				{post.title}
+			</h2>
+		{/each}
+	{/if}
 	<div class="mt-6 flex flex-col justify-center items-center">
 		<h2>USE VPN?! Toggle privacy mode</h2>
 		<div class="flex items-center">
