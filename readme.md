@@ -36,27 +36,6 @@ Upon starting the services, three default accounts will be created for you:
 
 These accounts can be used to explore the application's features without the need for initial setup.
 
-
-### Task description
-[https://01.kood.tech/git/root/public/src/branch/master/subjects/social-network](https://01.kood.tech/git/root/public/src/branch/master/subjects/social-network)
-
-
-> **Objectives**
-> You will have to create a Facebook-like social network that will contain the following features:
->
->   * Followers
->   * Profile
->   * Posts
->   * Groups
->   * Notification
->   * Chats
-
-
-### Audit 
-[https://01.kood.tech/git/root/public/src/branch/master/subjects/social-network/audit](https://01.kood.tech/git/root/public/src/branch/master/subjects/social-network/audit)
-
-
-
 ## Docker
 
 To get started, simply run
